@@ -1,0 +1,267 @@
+### ===============================================
+### Testes - ConsultaDinamicaController
+### API REST Pública para Consultas Dinâmicas
+### ===============================================
+
+@baseUrl = http://localhost:5249
+@apiPath = /api/ConsultaDinamica
+
+### ===============================================
+### 1. TESTES BÁSICOS - GET /{tabela}
+### ===============================================
+
+### 1.1 - Consulta CLIENTES sem JOINs
+GET {{baseUrl}}{{apiPath}}/CLIENTES?incluirJoins=false
+Content-Type: application/json
+
+### 1.2 - Consulta CLIENTES com JOINs (profundidade 1)
+GET {{baseUrl}}{{apiPath}}/CLIENTES?incluirJoins=true&profundidade=1
+Content-Type: application/json
+
+### 1.3 - Consulta CLIENTES com JOINs (profundidade 2)
+GET {{baseUrl}}{{apiPath}}/CLIENTES?incluirJoins=true&profundidade=2
+Content-Type: application/json
+
+### 1.4 - Consulta PRODUTOS sem JOINs
+GET {{baseUrl}}{{apiPath}}/PRODUTOS?incluirJoins=false
+Content-Type: application/json
+
+### 1.5 - Consulta PRODUTOS com JOINs (profundidade 1)
+GET {{baseUrl}}{{apiPath}}/PRODUTOS?incluirJoins=true&profundidade=1
+Content-Type: application/json
+
+### 1.6 - Consulta PEDIDOS com JOINs (profundidade 3)
+GET {{baseUrl}}{{apiPath}}/PEDIDOS?incluirJoins=true&profundidade=3
+Content-Type: application/json
+
+### 1.7 - Consulta CATEGORIAS sem JOINs
+GET {{baseUrl}}{{apiPath}}/CATEGORIAS?incluirJoins=false
+Content-Type: application/json
+
+### 1.8 - Consulta ITENS_PEDIDO com JOINs (profundidade 2)
+GET {{baseUrl}}{{apiPath}}/ITENS_PEDIDO?incluirJoins=true&profundidade=2
+Content-Type: application/json
+
+### 1.9 - Consulta ENDERECOS sem JOINs
+GET {{baseUrl}}{{apiPath}}/ENDERECOS?incluirJoins=false
+Content-Type: application/json
+
+### ===============================================
+### 2. TESTES COM FILTROS - POST /{tabela}/filtrar
+### ===============================================
+
+### 2.1 - Filtrar CLIENTES por nome
+POST {{baseUrl}}{{apiPath}}/CLIENTES/filtrar?incluirJoins=false
+Content-Type: application/json
+
+{
+  "NOME": "João Silva"
+}
+
+### 2.2 - Filtrar CLIENTES por email (com JOINs)
+POST {{baseUrl}}{{apiPath}}/CLIENTES/filtrar?incluirJoins=true&profundidade=1
+Content-Type: application/json
+
+{
+  "EMAIL": "joao.silva@email.com"
+}
+
+### 2.3 - Filtrar PRODUTOS por categoria
+POST {{baseUrl}}{{apiPath}}/PRODUTOS/filtrar?incluirJoins=true&profundidade=1
+Content-Type: application/json
+
+{
+  "ID_CATEGORIA": 1
+}
+
+### 2.4 - Filtrar PRODUTOS ativos
+POST {{baseUrl}}{{apiPath}}/PRODUTOS/filtrar?incluirJoins=false
+Content-Type: application/json
+
+{
+  "ATIVO": 1
+}
+
+### 2.5 - Filtrar PEDIDOS por cliente (com JOINs)
+POST {{baseUrl}}{{apiPath}}/PEDIDOS/filtrar?incluirJoins=true&profundidade=2
+Content-Type: application/json
+
+{
+  "ID_CLIENTE": 1
+}
+
+### 2.6 - Filtrar PEDIDOS por status
+POST {{baseUrl}}{{apiPath}}/PEDIDOS/filtrar?incluirJoins=false
+Content-Type: application/json
+
+{
+  "STATUS": "ENVIADO"
+}
+
+### 2.7 - Filtrar ITENS_PEDIDO por pedido específico
+POST {{baseUrl}}{{apiPath}}/ITENS_PEDIDO/filtrar?incluirJoins=true&profundidade=1
+Content-Type: application/json
+
+{
+  "ID_PEDIDO": 1
+}
+
+### 2.8 - Filtrar ENDERECOS por estado
+POST {{baseUrl}}{{apiPath}}/ENDERECOS/filtrar?incluirJoins=true&profundidade=1
+Content-Type: application/json
+
+{
+  "ESTADO": "SP"
+}
+
+### 2.9 - Filtrar CATEGORIAS ativas
+POST {{baseUrl}}{{apiPath}}/CATEGORIAS/filtrar?incluirJoins=false
+Content-Type: application/json
+
+{
+  "ATIVO": 1
+}
+
+### ===============================================
+### 3. TESTES COM PAGINAÇÃO - GET /{tabela}/paginado
+### ===============================================
+
+### 3.1 - CLIENTES - Página 1 (5 por página)
+GET {{baseUrl}}{{apiPath}}/CLIENTES/paginado?page=1&pageSize=5&incluirJoins=false
+Content-Type: application/json
+
+### 3.2 - CLIENTES - Página 2 (5 por página)
+GET {{baseUrl}}{{apiPath}}/CLIENTES/paginado?page=2&pageSize=5&incluirJoins=false
+Content-Type: application/json
+
+### 3.3 - PRODUTOS - Página 1 (3 por página, com JOINs)
+GET {{baseUrl}}{{apiPath}}/PRODUTOS/paginado?page=1&pageSize=3&incluirJoins=true&profundidade=1
+Content-Type: application/json
+
+### 3.4 - PRODUTOS - Página 2 (3 por página, com JOINs)
+GET {{baseUrl}}{{apiPath}}/PRODUTOS/paginado?page=2&pageSize=3&incluirJoins=true&profundidade=1
+Content-Type: application/json
+
+### 3.5 - PEDIDOS - Página 1 (2 por página, com JOINs profundidade 2)
+GET {{baseUrl}}{{apiPath}}/PEDIDOS/paginado?page=1&pageSize=2&incluirJoins=true&profundidade=2
+Content-Type: application/json
+
+### 3.6 - PEDIDOS - Página 3 (2 por página)
+GET {{baseUrl}}{{apiPath}}/PEDIDOS/paginado?page=3&pageSize=2&incluirJoins=false
+Content-Type: application/json
+
+### 3.7 - ITENS_PEDIDO - Página 1 (4 por página)
+GET {{baseUrl}}{{apiPath}}/ITENS_PEDIDO/paginado?page=1&pageSize=4&incluirJoins=false
+Content-Type: application/json
+
+### 3.8 - CATEGORIAS - Página 1 (todos na primeira página)
+GET {{baseUrl}}{{apiPath}}/CATEGORIAS/paginado?page=1&pageSize=10&incluirJoins=false
+Content-Type: application/json
+
+### 3.9 - ENDERECOS - Página 1 (2 por página, com JOINs)
+GET {{baseUrl}}{{apiPath}}/ENDERECOS/paginado?page=1&pageSize=2&incluirJoins=true&profundidade=1
+Content-Type: application/json
+
+### ===============================================
+### 4. TESTES DE LISTAGEM - GET /tabelas-disponiveis
+### ===============================================
+
+### 4.1 - Listar todas as tabelas permitidas
+GET {{baseUrl}}{{apiPath}}/tabelas-disponiveis
+Content-Type: application/json
+
+### ===============================================
+### 5. TESTES DE VALIDAÇÃO E ERROS
+### ===============================================
+
+### 5.1 - Tabela não permitida (não está no whitelist)
+GET {{baseUrl}}{{apiPath}}/USUARIOS?incluirJoins=false
+Content-Type: application/json
+
+### 5.2 - Tabela inexistente
+GET {{baseUrl}}{{apiPath}}/TABELA_INEXISTENTE?incluirJoins=false
+Content-Type: application/json
+
+### 5.3 - Profundidade inválida (negativa)
+GET {{baseUrl}}{{apiPath}}/CLIENTES?incluirJoins=true&profundidade=-1
+Content-Type: application/json
+
+### 5.4 - Page inválido (zero)
+GET {{baseUrl}}{{apiPath}}/CLIENTES/paginado?page=0&pageSize=5
+Content-Type: application/json
+
+### 5.5 - PageSize inválido (negativo)
+GET {{baseUrl}}{{apiPath}}/CLIENTES/paginado?page=1&pageSize=-5
+Content-Type: application/json
+
+### 5.6 - Filtro com campo inexistente
+POST {{baseUrl}}{{apiPath}}/CLIENTES/filtrar?incluirJoins=false
+Content-Type: application/json
+
+{
+  "CAMPO_INEXISTENTE": "valor"
+}
+
+### 5.7 - Tabela em lowercase (deve funcionar - case-insensitive)
+GET {{baseUrl}}{{apiPath}}/clientes?incluirJoins=false
+Content-Type: application/json
+
+### 5.8 - Tabela em MixedCase (deve funcionar - case-insensitive)
+GET {{baseUrl}}{{apiPath}}/Produtos?incluirJoins=false
+Content-Type: application/json
+
+### ===============================================
+### 6. TESTES DE PERFORMANCE E CARGA
+### ===============================================
+
+### 6.1 - Query complexa: PEDIDOS com profundidade 3 e paginação
+GET {{baseUrl}}{{apiPath}}/PEDIDOS/paginado?page=1&pageSize=10&incluirJoins=true&profundidade=3
+Content-Type: application/json
+
+### 6.2 - Query complexa: ITENS_PEDIDO com profundidade 2 e filtros
+POST {{baseUrl}}{{apiPath}}/ITENS_PEDIDO/filtrar?incluirJoins=true&profundidade=2
+Content-Type: application/json
+
+{
+  "ID_PEDIDO": 1
+}
+
+### 6.3 - Página fora do range (verificar comportamento)
+GET {{baseUrl}}{{apiPath}}/CLIENTES/paginado?page=999&pageSize=5&incluirJoins=false
+Content-Type: application/json
+
+### ===============================================
+### 7. TESTES EXPLORATÓRIOS
+### ===============================================
+
+### 7.1 - CLIENTES com todos os ENDERECOS (profundidade 1)
+GET {{baseUrl}}{{apiPath}}/CLIENTES?incluirJoins=true&profundidade=1
+Content-Type: application/json
+
+### 7.2 - PEDIDOS com CLIENTES e ITENS_PEDIDO (profundidade 2)
+GET {{baseUrl}}{{apiPath}}/PEDIDOS?incluirJoins=true&profundidade=2
+Content-Type: application/json
+
+### 7.3 - PRODUTOS com CATEGORIAS (profundidade 1)
+GET {{baseUrl}}{{apiPath}}/PRODUTOS?incluirJoins=true&profundidade=1
+Content-Type: application/json
+
+### 7.4 - Filtro múltiplo em PRODUTOS
+POST {{baseUrl}}{{apiPath}}/PRODUTOS/filtrar?incluirJoins=true&profundidade=1
+Content-Type: application/json
+
+{
+  "ID_CATEGORIA": 1,
+  "ATIVO": 1
+}
+
+### ===============================================
+### NOTAS:
+### - Todos os testes assumem que o banco está populado
+### - Execute scripts/create-tables.sql antes de testar
+### - Tabelas permitidas no whitelist:
+###   CLIENTES, PEDIDOS, PRODUTOS, CATEGORIAS,
+###   ITENS_PEDIDO, ENDERECOS
+### - Profundidade máxima recomendada: 3
+### - Validação case-insensitive de nomes
+### ===============================================
