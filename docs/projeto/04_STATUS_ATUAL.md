@@ -3,18 +3,18 @@
 ## 📊 Progresso Geral
 
 ```
-[████████████░░░░░░░░░░] 55% Concluído
+[███████████████░░░░░░░] 75% Concluído
 
 ✅ Fundação e Arquitetura: 100%
 ✅ Domain Layer: 100%
-✅ Infrastructure básica: 85%
-✅ API básica: 80%
-✅ Funcionalidades Core: 60%
-⏳ Testes: 0%
+✅ Infrastructure básica: 100%
+✅ API básica: 90%
+✅ Funcionalidades Core: 100%
+⏳ Testes: 20% (testes manuais realizados, automatizados pendentes)
 ⏳ Melhorias: 0%
 ```
 
-**Última atualização:** 13 de Novembro de 2025
+**Última atualização:** 15 de Novembro de 2025
 
 ---
 
@@ -142,21 +142,35 @@ QueryBuilder.Domain/
 ✅ Registro de DatabaseSettings
 ✅ Registro de IDbConnection (Oracle)
 ✅ Registro de IMetadadosRepository
+✅ Registro de IConsultaDinamicaRepository (NOVO)
 ✅ Registro de IQueryBuilderService (NOVO)
 ✅ Registro de OracleCompiler - Singleton (NOVO)
 ✅ Extension method AddInfrastructure()
 ```
 
+#### Infra.Data - Repositories (ATUALIZADO)
+**`ConsultaDinamicaRepository.cs`** - Execução de queries dinâmicas (NOVO) ✅
+```csharp
+✅ ExecutarQueryAsync(Query) - Retorna IEnumerable<dynamic>
+✅ ExecutarQueryCountAsync(Query) - Retorna contagem de registros
+✅ ExecutarQuerySingleAsync<T>(Query) - Retorna único registro tipado
+✅ ExecutarQueryAsync<T>(Query) - Retorna lista tipada
+✅ Compilação automática para SQL Oracle
+✅ Execução via Dapper
+✅ Timeout configurável (30s)
+✅ Tratamento de exceções
+✅ Logging estruturado
+```
+
 #### Pendente
 ```
-❌ ConsultaDinamicaRepository
 ❌ IADataCatalogService
 ❌ ValidacaoMetadadosService
 ```
 
 ---
 
-### 4. Camada API (70%) ✅
+### 4. Camada API (85%) ✅
 
 #### Program.cs
 ```csharp
@@ -192,9 +206,23 @@ QueryBuilder.Domain/
 ✅ Logging estruturado
 ```
 
+#### ConsultaDinamicaController.cs (NOVO) ✅
+```csharp
+✅ GET /api/ConsultaDinamica/{tabela} - Consulta básica com JOINs opcionais
+✅ POST /api/ConsultaDinamica/{tabela}/filtrar - Consulta com filtros dinâmicos
+✅ GET /api/ConsultaDinamica/{tabela}/paginado - Consulta paginada
+✅ GET /api/ConsultaDinamica/tabelas-disponiveis - Lista tabelas permitidas
+✅ Whitelist de segurança (6 tabelas: CLIENTES, PEDIDOS, PRODUTOS, etc.)
+✅ Parâmetro incluirJoins configurável
+✅ Parâmetro profundidade para controlar JOINs
+✅ Paginação com metadata (page, pageSize, totalRecords, totalPages)
+✅ Validação de tabelas permitidas (case-insensitive)
+✅ Tratamento de erros com status codes corretos
+✅ Logging estruturado
+```
+
 #### Pendente
 ```
-❌ ConsultaDinamicaController (endpoint público final)
 ❌ PUT /api/metadados/{id} - Atualizar
 ❌ DELETE /api/metadados/{id} - Deletar
 ❌ Validações de entrada (FluentValidation)
@@ -337,14 +365,24 @@ QueryBuilder.Domain/
 - [x] GET /api/metadados/tabela/CLIENTES retorna registro
 - [x] POST /api/metadados cria novo registro
 - [x] Validações de domínio funcionando
-- [x] Oracle conectando corretamente
+- [x] Oracle conectando corretamente (XEPDB1) **AJUSTADO**
 - [x] Docker containers rodando
 - [x] Scripts SQL executando
-- [x] QueryBuilderService gerando SQL simples (NOVO)
-- [x] QueryBuilderService gerando SQL com JOINs (NOVO)
-- [x] QueryBuilderService aplicando filtros WHERE (NOVO)
-- [x] Prevenção de loops infinitos em JOINs funcionando (NOVO)
-- [x] Compilação para SQL Oracle correta (NOVO)
+- [x] QueryBuilderService gerando SQL simples
+- [x] QueryBuilderService gerando SQL com JOINs
+- [x] QueryBuilderService aplicando filtros WHERE
+- [x] Prevenção de loops infinitos em JOINs funcionando
+- [x] Compilação para SQL Oracle correta
+- [x] ConsultaDinamicaController retornando dados corretamente **NOVO**
+- [x] Conversão de JsonElement para tipos nativos funcionando **NOVO**
+- [x] Queries com LEFT JOIN retornando todas as linhas **NOVO**
+- [x] Dapper mapeando dynamic corretamente **NOVO**
+
+### Testes Manuais (Em Andamento) ⏳
+- [ ] Completar todos os 50+ casos de teste do consulta-dinamica-tests.http
+- [ ] Validar paginação com diferentes tamanhos
+- [ ] Testar filtros complexos combinados
+- [ ] Verificar performance com profundidade 3
 
 ### Testes Automatizados (Pendente) ❌
 - [ ] Testes unitários
@@ -399,7 +437,7 @@ QueryBuilder.Domain/
 - ❌ Atualizar metadado existente (endpoint)
 - ❌ Deletar metadado (soft delete)
 
-### Consultas Dinâmicas (ATUALIZADO)
+### Consultas Dinâmicas (MVP COMPLETO) ✅
 - ✅ Gerar query baseada em metadados (QueryBuilderService)
 - ✅ JOINs automáticos com profundidade configurável
 - ✅ JOINs recursivos com prevenção de loops
@@ -409,7 +447,9 @@ QueryBuilder.Domain/
 - ✅ Compilação para SQL Oracle
 - ✅ Listar tabelas disponíveis
 - ✅ Grafo de relacionamentos
-- ⏳ Executar query gerada no banco (próximo passo)
+- ✅ Executar query gerada no banco (ConsultaDinamicaRepository) **NOVO**
+- ✅ API pública REST para consultas (ConsultaDinamicaController) **NOVO**
+- ✅ Whitelist de segurança para tabelas permitidas **NOVO**
 
 ### Recursos Avançados
 - ❌ Cache de metadados
@@ -455,22 +495,22 @@ QueryBuilder.Domain/
 ### Linhas de Código (Aproximado)
 ```
 Domain Layer:       ~750 linhas (+350 QueryBuilderService)
-Infrastructure:     ~350 linhas
-API Layer:          ~380 linhas (+180 QueryBuilderTestController)
-Scripts SQL:        ~650 linhas (+450 create-tables.sql)
-Documentação:       ~4300 linhas (+1300)
-Testes HTTP:        ~230 linhas (novo)
-Total:              ~6660 linhas
+Infrastructure:     ~500 linhas (+148 ConsultaDinamicaRepository)
+API Layer:          ~700 linhas (+180 QueryBuilderTest, +320 ConsultaDinamica com conversores)
+Scripts SQL:        ~750 linhas (+450 create-tables.sql, +100 verificação)
+Documentação:       ~4500 linhas (+1500)
+Testes HTTP:        ~350 linhas (querybuilder + consulta-dinamica)
+Total:              ~7550 linhas
 ```
 
 ### Arquivos Criados
 ```
-Arquivos .cs:       17 (+2 novos)
-Arquivos .sql:      4 (+1 create-tables.sql)
-Arquivos .http:     2 (+1 querybuilder-tests.http)
+Arquivos .cs:       19 (+2 Repository, +1 Controller)
+Arquivos .sql:      6 (+3 scripts debug/verificação)
+Arquivos .http:     2 (querybuilder-tests + consulta-dinamica-tests)
 Arquivos .md:       11
 Arquivos config:    8
-Total:              42 arquivos
+Total:              46 arquivos
 ```
 
 ---
@@ -519,17 +559,22 @@ dotnet build QueryBuilder.Solution.sln
 
 ## 📊 Próximas Prioridades
 
-1. **Implementar QueryBuilderService** (Core do sistema)
-2. **Criar ConsultaDinamicaController**
-3. **Adicionar testes unitários**
-4. **Implementar cache**
-5. **Melhorar logging**
+1. ✅ ~~Implementar QueryBuilderService~~ (Concluído)
+2. ✅ ~~Criar ConsultaDinamicaRepository~~ (Concluído)
+3. ✅ ~~Criar ConsultaDinamicaController~~ (Concluído)
+4. ✅ ~~Corrigir connection string para XEPDB1~~ (Concluído)
+5. ⏳ **Completar testes manuais com consulta-dinamica-tests.http** (Em andamento)
+6. **Criar testes de integração automatizados**
+7. **Implementar cache de metadados**
+8. **Adicionar testes unitários**
+9. **Implementar logging avançado**
+10. **Adicionar autenticação/autorização**
 
 ---
 
 <div align="center">
 
-**✅ Base sólida construída - Pronto para as funcionalidades core! 🚀**
+**✅ MVP FUNCIONAL COMPLETO - Query dinâmica funcionando de ponta a ponta! 🚀**
 
 [← Voltar ao Índice](00_INDICE.md) | [Próximo: Roadmap →](05_ROADMAP.md)
 
