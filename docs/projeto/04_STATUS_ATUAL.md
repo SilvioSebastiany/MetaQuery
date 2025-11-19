@@ -559,16 +559,39 @@ dotnet build QueryBuilder.Solution.sln
 
 ## 📊 Próximas Prioridades
 
-1. ✅ ~~Implementar QueryBuilderService~~ (Concluído)
-2. ✅ ~~Criar ConsultaDinamicaRepository~~ (Concluído)
-3. ✅ ~~Criar ConsultaDinamicaController~~ (Concluído)
-4. ✅ ~~Corrigir connection string para XEPDB1~~ (Concluído)
-5. ⏳ **Completar testes manuais com consulta-dinamica-tests.http** (Em andamento)
-6. **Criar testes de integração automatizados**
-7. **Implementar cache de metadados**
-8. **Adicionar testes unitários**
-9. **Implementar logging avançado**
-10. **Adicionar autenticação/autorização**
+### 🎯 FASE ARQUITETURAL: Migração para Padrão Herval (Prioridade ALTA)
+
+1. 🔴 **Implementar CQRS + MediatR** (Semana 1-2)
+   - Instalar MediatR e FluentValidation
+   - Criar estrutura Commands/ e Queries/ no Domain
+   - Migrar lógica para Handlers
+   - Refatorar Controllers para usar IMediator
+
+2. 🔴 **Implementar Notification Pattern** (Semana 2)
+   - Criar INotificationContext e NotificationContext
+   - Substituir exceptions por notificações
+   - Pipeline de validação automática
+
+3. 🔴 **Implementar Unit of Work** (Semana 2)
+   - Criar IUnitOfWork interface
+   - Controle transacional explícito
+   - CommitAsync() pattern
+
+4. 🟡 **DTOs Request/Response** (Semana 3)
+   - Separar DTOs de entrada e saída
+   - Criar mappers
+   - Validadores FluentValidation
+
+5. 🟡 **Pipeline Behaviors** (Semana 3)
+   - ValidationBehavior automático
+   - LoggingBehavior
+   - TransactionBehavior
+
+6. ⏳ **Completar testes manuais** (Em andamento)
+7. **Criar testes de integração automatizados**
+8. **Implementar cache de metadados**
+9. **Implementar logging avançado (Graylog)**
+10. **Adicionar autenticação/autorização (OAuth/JWT)**
 
 ---
 

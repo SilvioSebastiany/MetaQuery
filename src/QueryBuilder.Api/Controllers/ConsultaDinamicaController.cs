@@ -54,8 +54,7 @@ public class ConsultaDinamicaController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> Consultar(
-        string tabela,
+    public async Task<IActionResult> Consultar( string tabela,
         [FromQuery] bool incluirJoins = false,
         [FromQuery] int profundidade = 2)
     {

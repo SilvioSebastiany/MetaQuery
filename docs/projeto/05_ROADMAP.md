@@ -4,6 +4,7 @@
 
 ```
 ✅ Fase 1: Fundação              [████████████] 100%
+🚧 Fase 1.5: Arquitetural CQRS   [░░░░░░░░░░░░]   0% ← NOVA PRIORIDADE
 🚧 Fase 2: Funcionalidades Core  [███░░░░░░░░░]  20%
 ⏳ Fase 3: Qualidade             [░░░░░░░░░░░░]   0%
 ⏳ Fase 4: Melhorias             [░░░░░░░░░░░░]   0%
@@ -70,6 +71,316 @@ Criar a base sólida do projeto com Clean Architecture e infraestrutura completa
 - [x] Documentação técnica (docs/)
 - [x] api-tests.http
 - [x] Estrutura docs/projeto/
+
+---
+
+## 🔄 Fase 1.5: Migração Arquitetural - Padrão Herval (NOVA PRIORIDADE)
+
+**Status:** 🎯 PRÓXIMA FASE
+**Prazo Estimado:** 3 semanas
+**Data Prevista:** 09/12/2025
+
+### Objetivos
+Migrar arquitetura atual para o padrão corporativo da empresa (Herval), implementando CQRS + MediatR + Notification Pattern.
+
+### Motivação
+- ✅ Alinhamento com padrão da empresa
+- ✅ Facilita manutenção por outros desenvolvedores
+- ✅ Consistência entre projetos da organização
+- ✅ Melhor separação de responsabilidades
+- ✅ Validações automáticas com pipeline
+- ✅ Melhor testabilidade
+
+### 1.5.1 CQRS + MediatR Base
+```
+Prioridade: 🔴 CRÍTICA
+Complexidade: ⭐⭐⭐⭐
+Tempo estimado: 1 semana
+```
+
+**Tarefas:**
+- [ ] Instalar pacotes MediatR (Domain, IoC)
+- [ ] Criar estrutura de pastas Commands/ e Queries/ no Domain
+- [ ] Criar 5+ Queries com seus Handlers
+  - ConsultaDinamicaQuery
+  - ObterMetadadosQuery
+  - ObterMetadadoPorIdQuery
+  - ObterMetadadoPorTabelaQuery
+  - ListarTabelasDisponiveisQuery
+- [ ] Criar 3+ Commands com seus Handlers
+  - CriarMetadadoCommand
+  - AtualizarMetadadoCommand
+  - DesativarMetadadoCommand
+- [ ] Refatorar Controllers para usar IMediator
+- [ ] Remover injeção direta de repositories/services
+- [ ] Registrar MediatR no DI com Assembly scanning
+- [ ] Testes de integração dos novos patterns
+
+**Exemplo de Implementação:**
+```csharp
+// Query
+public record ConsultaDinamicaQuery(
+    string Tabela,
+    bool IncluirJoins = false,
+    int Profundidade = 1
+) : IRequest<ConsultaDinamicaResult>;
+
+// Handler
+public class ConsultaDinamicaQueryHandler
+    : IRequestHandler<ConsultaDinamicaQuery, ConsultaDinamicaResult>
+{
+    private readonly IQueryBuilderService _queryBuilder;
+    private readonly IConsultaDinamicaRepository _repository;
+
+    public async Task<ConsultaDinamicaResult> Handle(
+        ConsultaDinamicaQuery request,
+        CancellationToken ct)
+    {
+        var query = await _queryBuilder.MontarQueryAsync(
+            request.Tabela, request.IncluirJoins, request.Profundidade);
+        var dados = await _repository.ExecutarQueryAsync(query);
+
+        return new ConsultaDinamicaResult(request.Tabela, dados.Count(), dados);
+    }
+}
+
+// Controller
+[ApiController]
+[Route("api/[controller]")]
+public class ConsultaDinamicaController : ControllerBase
+{
+    private readonly IMediator _mediator;
+
+    [HttpGet("{tabela}")]
+    public async Task<IActionResult> Consultar(string tabela, bool incluirJoins = false)
+    {
+        var query = new ConsultaDinamicaQuery(tabela, incluirJoins);
+        var resultado = await _mediator.Send(query);
+        return Ok(resultado);
+    }
+}
+```
+
+### 1.5.2 Notification Pattern
+```
+Prioridade: 🔴 ALTA
+Complexidade: ⭐⭐⭐
+Tempo estimado: 3 dias
+```
+
+**Tarefas:**
+- [ ] Criar INotificationContext interface
+- [ ] Implementar NotificationContext
+- [ ] Criar Notification record
+- [ ] Registrar como Scoped no DI
+- [ ] Substituir exceptions por notificações nos Handlers
+- [ ] Criar NotificationFilter para API
+- [ ] Retornar 400 BadRequest quando houver notificações
+
+**Implementação:**
+```csharp
+public interface INotificationContext
+{
+    void AddNotification(string key, string message);
+    void AddNotifications(IEnumerable<Notification> notifications);
+    bool HasNotifications { get; }
+    IReadOnlyCollection<Notification> Notifications { get; }
+}
+
+public class NotificationContext : INotificationContext
+{
+    private readonly List<Notification> _notifications = new();
+
+    public void AddNotification(string key, string message)
+        => _notifications.Add(new Notification(key, message));
+
+    public bool HasNotifications => _notifications.Any();
+    public IReadOnlyCollection<Notification> Notifications => _notifications.AsReadOnly();
+}
+```
+
+### 1.5.3 FluentValidation + Pipeline
+```
+Prioridade: 🔴 ALTA
+Complexidade: ⭐⭐⭐
+Tempo estimado: 3 dias
+```
+
+**Tarefas:**
+- [ ] Instalar FluentValidation.DependencyInjectionExtensions
+- [ ] Criar Validators para Queries/Commands
+  - ConsultaDinamicaQueryValidator
+  - CriarMetadadoCommandValidator
+  - AtualizarMetadadoCommandValidator
+- [ ] Implementar ValidationBehavior<TRequest, TResponse>
+- [ ] Implementar LoggingBehavior<TRequest, TResponse>
+- [ ] Registrar behaviors no pipeline do MediatR
+- [ ] Configurar Assembly scanning de validadores
+- [ ] Validação automática via pipeline
+
+**ValidationBehavior:**
+```csharp
+public class ValidationBehavior<TRequest, TResponse>
+    : IPipelineBehavior<TRequest, TResponse>
+    where TRequest : IRequest<TResponse>
+{
+    private readonly IEnumerable<IValidator<TRequest>> _validators;
+    private readonly INotificationContext _notificationContext;
+
+    public async Task<TResponse> Handle(
+        TRequest request,
+        RequestHandlerDelegate<TResponse> next,
+        CancellationToken ct)
+    {
+        var context = new ValidationContext<TRequest>(request);
+        var failures = _validators
+            .Select(v => v.Validate(context))
+            .SelectMany(result => result.Errors)
+            .Where(f => f != null)
+            .ToList();
+
+        if (failures.Any())
+        {
+            foreach (var failure in failures)
+                _notificationContext.AddNotification(
+                    failure.PropertyName, failure.ErrorMessage);
+            return default!;
+        }
+
+        return await next();
+    }
+}
+```
+
+### 1.5.4 Unit of Work Pattern
+```
+Prioridade: 🟡 MÉDIA
+Complexidade: ⭐⭐⭐
+Tempo estimado: 2 dias
+```
+
+**Tarefas:**
+- [ ] Criar interface IUnitOfWork
+- [ ] Implementar UnitOfWork para Dapper + Oracle
+- [ ] Registrar como Scoped no DI
+- [ ] Refatorar Handlers para usar CommitAsync()
+- [ ] Remover commits automáticos de repositories
+- [ ] Implementar Rollback em caso de erro
+- [ ] TransactionBehavior opcional
+
+**Implementação:**
+```csharp
+public interface IUnitOfWork
+{
+    Task<bool> CommitAsync(CancellationToken ct = default);
+    void Rollback();
+}
+
+public class UnitOfWork : IUnitOfWork, IDisposable
+{
+    private readonly IDbConnection _connection;
+    private IDbTransaction? _transaction;
+
+    public UnitOfWork(IDbConnection connection)
+    {
+        _connection = connection;
+        if (_connection.State != ConnectionState.Open)
+            _connection.Open();
+        _transaction = _connection.BeginTransaction();
+    }
+
+    public async Task<bool> CommitAsync(CancellationToken ct = default)
+    {
+        try
+        {
+            _transaction?.Commit();
+            return true;
+        }
+        catch
+        {
+            _transaction?.Rollback();
+            throw;
+        }
+        finally
+        {
+            _transaction?.Dispose();
+            _transaction = null;
+        }
+    }
+
+    public void Dispose() => _transaction?.Dispose();
+}
+```
+
+### 1.5.5 DTOs Request/Response
+```
+Prioridade: 🟡 MÉDIA
+Complexidade: ⭐⭐
+Tempo estimado: 2 dias
+```
+
+**Tarefas:**
+- [ ] Criar pasta Dtos/Request/ no projeto API
+- [ ] Criar pasta Dtos/Response/ no projeto API
+- [ ] Criar DTOs separados para cada endpoint
+- [ ] Criar extensões/mappers para conversão
+- [ ] Remover Dictionary<string, object> direto
+- [ ] Documentar DTOs no Swagger
+
+**Exemplo:**
+```csharp
+// Request
+public record ConsultaDinamicaRequest(
+    [Required] string Tabela,
+    bool IncluirJoins = false,
+    [Range(1, 3)] int Profundidade = 1
+);
+
+// Response
+public record ConsultaDinamicaResponse(
+    string Tabela,
+    int TotalRegistros,
+    IEnumerable<dynamic> Dados,
+    string SqlGerado
+);
+
+// Mapper extension
+public static class ConsultaDinamicaMapper
+{
+    public static ConsultaDinamicaQuery ToQuery(this ConsultaDinamicaRequest request)
+        => new(request.Tabela, request.IncluirJoins, request.Profundidade);
+
+    public static ConsultaDinamicaResponse ToResponse(this ConsultaDinamicaResult result)
+        => new(result.Tabela, result.TotalRegistros, result.Dados, result.SqlGerado);
+}
+```
+
+### 1.5.6 Filtros Globais de API
+```
+Prioridade: 🟢 BAIXA
+Complexidade: ⭐⭐
+Tempo estimado: 1 dia
+```
+
+**Tarefas:**
+- [ ] Criar NotificationFilter
+- [ ] Criar ExceptionFilter global
+- [ ] Criar ModelStateFilter
+- [ ] Registrar filters no Program.cs
+- [ ] Remover try/catch manuais dos controllers
+
+### 📊 Comparativo: Antes vs Depois da Migração
+
+| Aspecto | Antes (Atual) | Depois (Padrão Herval) |
+|---------|---------------|-------------------------|
+| **Arquitetura** | Clean Architecture + DDD | Clean + DDD + CQRS + MediatR |
+| **Controllers** | Injetam Repositories/Services | Injetam apenas IMediator |
+| **Validações** | Manual (if/BadRequest) | Automática (FluentValidation Pipeline) |
+| **Erros** | Exceptions | Notification Pattern |
+| **Transações** | Sem controle explícito | Unit of Work Pattern |
+| **Handlers** | Lógica nos Services | Handlers de Commands/Queries |
+| **Testabilidade** | Média | Alta (Handlers isolados) |
+| **Manutenibilidade** | Boa | Excelente (Padrão corporativo) |
 
 ---
 

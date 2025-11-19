@@ -1,5 +1,432 @@
 # ⏭️ Próximos Passos
 
+## 🏢 MIGRAÇÃO PARA PADRÃO HERVAL (NOVA PRIORIDADE)
+
+**Contexto:** A empresa utiliza CQRS + MediatR como padrão arquitetural. Este projeto precisa ser alinhado para facilitar manutenção e integração com outros sistemas.
+
+**Meta:** Migrar arquitetura atual (Clean Architecture + DDD) para **Clean Architecture + DDD + CQRS + MediatR** seguindo padrões da Herval.
+
+### 🎯 Fase CQRS (Prioridade Máxima - 3 semanas)
+
+---
+
+### 1. 🔴 SEMANA 1: MediatR + CQRS Base
+
+**Tempo estimado:** 5 dias
+**Complexidade:** ⭐⭐⭐⭐
+
+#### Dia 1: Setup e Pacotes
+- [ ] Instalar `MediatR` (12.x) no QueryBuilder.Domain
+- [ ] Instalar `MediatR.Extensions.Microsoft.DependencyInjection` no IoC
+- [ ] Instalar `FluentValidation` (já instalado, configurar uso)
+- [ ] Instalar `FluentValidation.DependencyInjectionExtensions`
+
+**Comandos:**
+```powershell
+dotnet add src/QueryBuilder.Domain/QueryBuilder.Domain.csproj package MediatR
+dotnet add src/QueryBuilder.Infra.CrossCutting.IoC/QueryBuilder.Infra.CrossCutting.IoC.csproj package MediatR.Extensions.Microsoft.DependencyInjection
+dotnet add src/QueryBuilder.Domain/QueryBuilder.Domain.csproj package FluentValidation.DependencyInjectionExtensions
+```
+
+#### Dia 2-3: Estrutura de Queries
+- [ ] Criar `src/QueryBuilder.Domain/Queries/`
+- [ ] Criar `src/QueryBuilder.Domain/Queries/Handlers/`
+- [ ] Criar `src/QueryBuilder.Domain/Queries/ConsultaDinamica/`
+
+**Query Pattern:**
+```csharp
+// ConsultaDinamicaQuery.cs
+public record ConsultaDinamicaQuery(
+    string Tabela,
+    bool IncluirJoins = false,
+    int Profundidade = 1
+) : IRequest<ConsultaDinamicaResult>;
+
+// ConsultaDinamicaResult.cs
+public record ConsultaDinamicaResult(
+    string Tabela,
+    int TotalRegistros,
+    IEnumerable<dynamic> Dados,
+    string SqlGerado
+);
+
+// ConsultaDinamicaQueryHandler.cs
+public class ConsultaDinamicaQueryHandler
+    : IRequestHandler<ConsultaDinamicaQuery, ConsultaDinamicaResult>
+{
+    private readonly IQueryBuilderService _queryBuilder;
+    private readonly IConsultaDinamicaRepository _repository;
+    private readonly ILogger<ConsultaDinamicaQueryHandler> _logger;
+
+    public async Task<ConsultaDinamicaResult> Handle(
+        ConsultaDinamicaQuery request,
+        CancellationToken ct)
+    {
+        _logger.LogInformation(
+            "Executando consulta dinâmica - Tabela: {Tabela}",
+            request.Tabela);
+
+        // Gerar query
+        var query = await _queryBuilder.MontarQueryAsync(
+            request.Tabela,
+            request.IncluirJoins,
+            request.Profundidade);
+
+        // Executar
+        var dados = await _repository.ExecutarQueryAsync(query);
+        var sql = _queryBuilder.CompilarQuery(query);
+
+        return new ConsultaDinamicaResult(
+            request.Tabela,
+            dados.Count(),
+            dados,
+            sql.Sql
+        );
+    }
+}
+```
+
+#### Dia 4: Queries Adicionais
+- [ ] `ObterMetadadosQuery` + Handler
+- [ ] `ObterMetadadoPorIdQuery` + Handler
+- [ ] `ObterMetadadoPorTabelaQuery` + Handler
+- [ ] `ListarTabelasDisponiveisQuery` + Handler
+
+#### Dia 5: Refatorar Controllers
+- [ ] Injetar `IMediator` nos controllers
+- [ ] Substituir chamadas diretas para repositories/services por `mediator.Send(query)`
+- [ ] Remover injeção de repositories nos controllers
+
+**Controller Refatorado:**
+```csharp
+[ApiController]
+[Route("api/[controller]")]
+public class ConsultaDinamicaController : ControllerBase
+{
+    private readonly IMediator _mediator;
+    private readonly ILogger<ConsultaDinamicaController> _logger;
+
+    public ConsultaDinamicaController(
+        IMediator mediator,
+        ILogger<ConsultaDinamicaController> logger)
+    {
+        _mediator = mediator;
+        _logger = logger;
+    }
+
+    [HttpGet("{tabela}")]
+    public async Task<IActionResult> ConsultarTabela(
+        string tabela,
+        [FromQuery] bool incluirJoins = false,
+        [FromQuery] int profundidade = 1)
+    {
+        var query = new ConsultaDinamicaQuery(tabela, incluirJoins, profundidade);
+        var resultado = await _mediator.Send(query);
+
+        return Ok(resultado);
+    }
+}
+```
+
+---
+
+### 2. 🔴 SEMANA 2: Notification Pattern + Validations
+
+**Tempo estimado:** 5 dias
+**Complexidade:** ⭐⭐⭐⭐
+
+#### Dia 1-2: Notification Context
+- [ ] Criar `src/QueryBuilder.Domain/Notifications/`
+- [ ] Criar interface `INotificationContext`
+- [ ] Implementar `NotificationContext`
+- [ ] Criar `Notification` record
+
+**Implementação:**
+```csharp
+// INotificationContext.cs
+public interface INotificationContext
+{
+    void AddNotification(string key, string message);
+    void AddNotifications(IEnumerable<Notification> notifications);
+    bool HasNotifications { get; }
+    IReadOnlyCollection<Notification> Notifications { get; }
+    void Clear();
+}
+
+// Notification.cs
+public record Notification(string Key, string Message);
+
+// NotificationContext.cs
+public class NotificationContext : INotificationContext
+{
+    private readonly List<Notification> _notifications = new();
+
+    public void AddNotification(string key, string message)
+    {
+        _notifications.Add(new Notification(key, message));
+    }
+
+    public void AddNotifications(IEnumerable<Notification> notifications)
+    {
+        _notifications.AddRange(notifications);
+    }
+
+    public bool HasNotifications => _notifications.Any();
+
+    public IReadOnlyCollection<Notification> Notifications => _notifications.AsReadOnly();
+
+    public void Clear() => _notifications.Clear();
+}
+```
+
+#### Dia 3: FluentValidation Validators
+- [ ] Criar `ConsultaDinamicaQueryValidator`
+- [ ] Criar `CriarMetadadoCommandValidator`
+- [ ] Configurar assembly scanning de validadores
+
+**Validator Example:**
+```csharp
+public class ConsultaDinamicaQueryValidator : AbstractValidator<ConsultaDinamicaQuery>
+{
+    private static readonly string[] TabelasPermitidas =
+    {
+        "CLIENTES", "PEDIDOS", "PRODUTOS", "CATEGORIAS", "ITENS_PEDIDO", "ENDERECOS"
+    };
+
+    public ConsultaDinamicaQueryValidator()
+    {
+        RuleFor(x => x.Tabela)
+            .NotEmpty().WithMessage("Tabela é obrigatória")
+            .Must(tabela => TabelasPermitidas.Contains(tabela.ToUpper()))
+            .WithMessage("Tabela não autorizada");
+
+        RuleFor(x => x.Profundidade)
+            .InclusiveBetween(1, 3)
+            .WithMessage("Profundidade deve estar entre 1 e 3");
+    }
+}
+```
+
+#### Dia 4-5: Pipeline Behaviors
+- [ ] Criar `ValidationBehavior<TRequest, TResponse>`
+- [ ] Criar `LoggingBehavior<TRequest, TResponse>`
+- [ ] Registrar behaviors no DI
+
+**ValidationBehavior:**
+```csharp
+public class ValidationBehavior<TRequest, TResponse>
+    : IPipelineBehavior<TRequest, TResponse>
+    where TRequest : IRequest<TResponse>
+{
+    private readonly IEnumerable<IValidator<TRequest>> _validators;
+    private readonly INotificationContext _notificationContext;
+
+    public async Task<TResponse> Handle(
+        TRequest request,
+        RequestHandlerDelegate<TResponse> next,
+        CancellationToken ct)
+    {
+        if (!_validators.Any())
+            return await next();
+
+        var context = new ValidationContext<TRequest>(request);
+        var failures = _validators
+            .Select(v => v.Validate(context))
+            .SelectMany(result => result.Errors)
+            .Where(f => f != null)
+            .ToList();
+
+        if (failures.Any())
+        {
+            foreach (var failure in failures)
+            {
+                _notificationContext.AddNotification(
+                    failure.PropertyName,
+                    failure.ErrorMessage);
+            }
+
+            return default!; // Retorna default se validação falhar
+        }
+
+        return await next();
+    }
+}
+```
+
+---
+
+### 3. 🟡 SEMANA 3: Commands + Unit of Work
+
+**Tempo estimado:** 5 dias
+**Complexidade:** ⭐⭐⭐
+
+#### Dia 1-2: Commands Structure
+- [ ] Criar `src/QueryBuilder.Domain/Commands/`
+- [ ] Criar `src/QueryBuilder.Domain/Commands/Handlers/`
+- [ ] Criar `src/QueryBuilder.Domain/Commands/Metadados/`
+
+**Command Pattern:**
+```csharp
+// CriarMetadadoCommand.cs
+public record CriarMetadadoCommand(
+    string Tabela,
+    string CamposDisponiveis,
+    string ChavePk,
+    string? VinculoEntreTabela = null,
+    string? Descricao = null
+) : IRequest<int>; // Retorna ID do metadado criado
+
+// CriarMetadadoCommandHandler.cs
+public class CriarMetadadoCommandHandler
+    : IRequestHandler<CriarMetadadoCommand, int>
+{
+    private readonly IMetadadosRepository _repository;
+    private readonly IUnitOfWork _uow;
+    private readonly INotificationContext _notificationContext;
+    private readonly ILogger<CriarMetadadoCommandHandler> _logger;
+
+    public async Task<int> Handle(
+        CriarMetadadoCommand request,
+        CancellationToken ct)
+    {
+        // Criar entidade de domínio
+        var metadado = TabelaDinamica.Criar(
+            request.Tabela,
+            request.CamposDisponiveis,
+            request.ChavePk,
+            request.VinculoEntreTabela,
+            request.Descricao
+        );
+
+        // Validações do domínio já estão na entidade
+        // Se tiver erro, exceção é lançada
+
+        // Persistir
+        var id = await _repository.CriarAsync(metadado);
+
+        // Commit transação
+        await _uow.CommitAsync();
+
+        _logger.LogInformation(
+            "Metadado criado - ID: {Id}, Tabela: {Tabela}",
+            id, metadado.Tabela);
+
+        return id;
+    }
+}
+```
+
+#### Dia 3: Unit of Work
+- [ ] Criar `src/QueryBuilder.Domain/Interfaces/IUnitOfWork.cs`
+- [ ] Implementar `src/QueryBuilder.Infra.Data/UnitOfWork.cs`
+
+**UnitOfWork:**
+```csharp
+// IUnitOfWork.cs
+public interface IUnitOfWork
+{
+    Task<bool> CommitAsync(CancellationToken ct = default);
+    void Rollback();
+}
+
+// UnitOfWork.cs (para Dapper com Oracle)
+public class UnitOfWork : IUnitOfWork
+{
+    private readonly IDbConnection _connection;
+    private IDbTransaction? _transaction;
+
+    public UnitOfWork(IDbConnection connection)
+    {
+        _connection = connection;
+        if (_connection.State != ConnectionState.Open)
+            _connection.Open();
+
+        _transaction = _connection.BeginTransaction();
+    }
+
+    public async Task<bool> CommitAsync(CancellationToken ct = default)
+    {
+        try
+        {
+            _transaction?.Commit();
+            return true;
+        }
+        catch
+        {
+            _transaction?.Rollback();
+            throw;
+        }
+        finally
+        {
+            _transaction?.Dispose();
+            _transaction = null;
+        }
+    }
+
+    public void Rollback()
+    {
+        _transaction?.Rollback();
+        _transaction?.Dispose();
+        _transaction = null;
+    }
+
+    public void Dispose()
+    {
+        _transaction?.Dispose();
+    }
+}
+```
+
+#### Dia 4-5: Refatorar Repositories
+- [ ] Adicionar `IUnitOfWork` nos repositories
+- [ ] Remover commits automáticos
+- [ ] Deixar commit para handlers
+
+---
+
+### 4. 📋 Checklist Final - Padrão Herval Completo
+
+#### CQRS ✅
+- [ ] MediatR instalado e configurado
+- [ ] Queries criadas (5+)
+- [ ] QueryHandlers implementados (5+)
+- [ ] Commands criados (3+)
+- [ ] CommandHandlers implementados (3+)
+- [ ] Controllers refatorados para usar IMediator
+- [ ] Sem injeção direta de repositories em controllers
+
+#### Notification Pattern ✅
+- [ ] INotificationContext implementado
+- [ ] NotificationContext registrado no DI
+- [ ] Handlers usando NotificationContext
+- [ ] Exceções substituídas por notificações (onde adequado)
+
+#### FluentValidation ✅
+- [ ] Validators criados para Queries/Commands
+- [ ] ValidationBehavior implementado
+- [ ] Assembly scanning configurado
+- [ ] Pipeline de validação automático
+
+#### Unit of Work ✅
+- [ ] IUnitOfWork interface criada
+- [ ] UnitOfWork implementado
+- [ ] Handlers usando CommitAsync()
+- [ ] Repositories sem commit automático
+
+#### Pipeline Behaviors ✅
+- [ ] ValidationBehavior registrado
+- [ ] LoggingBehavior registrado
+- [ ] TransactionBehavior registrado (opcional)
+
+#### Dependency Injection ✅
+- [ ] MediatR registrado com Assembly scanning
+- [ ] Validators registrados automaticamente
+- [ ] Behaviors registrados na ordem correta
+- [ ] NotificationContext como Scoped
+- [ ] UnitOfWork como Scoped
+
+---
+
 ## 🎯 Prioridades Imediatas (Esta Semana)
 
 ### 1. 🔴 PRIORIDADE MÁXIMA: QueryBuilderService

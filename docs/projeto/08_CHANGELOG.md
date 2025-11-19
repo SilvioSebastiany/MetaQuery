@@ -4,6 +4,100 @@ Registro de todas as mudanças notáveis neste projeto.
 
 ---
 
+## [0.5.0] - 2025-12-09 (PLANEJADO - Migração CQRS + Padrão Herval)
+
+### 🎯 Objetivo
+Migrar arquitetura para padrão corporativo da empresa (Herval) com CQRS + MediatR.
+
+### ✨ A Adicionar
+- **MediatR + CQRS**
+  - Estrutura completa de Commands/ e Queries/ no Domain
+  - 5+ Queries com Handlers (ConsultaDinamica, ObterMetadados, etc.)
+  - 3+ Commands com Handlers (Criar, Atualizar, Desativar metadados)
+  - Controllers refatorados para usar IMediator
+  - Remoção de injeção direta de repositories/services
+
+- **Notification Pattern**
+  - INotificationContext e NotificationContext implementados
+  - Substituição de exceptions por notificações
+  - NotificationFilter global na API
+  - Respostas 400 BadRequest com lista de erros
+
+- **FluentValidation Pipeline**
+  - Validators para todos Commands/Queries
+  - ValidationBehavior automático
+  - LoggingBehavior para auditoria
+  - Assembly scanning de validadores
+
+- **Unit of Work Pattern**
+  - IUnitOfWork interface
+  - UnitOfWork implementado para Oracle + Dapper
+  - Controle transacional explícito nos Handlers
+  - CommitAsync() pattern
+  - Rollback automático em erros
+
+- **DTOs Request/Response**
+  - DTOs separados por endpoint
+  - Mappers/Extensions para conversão
+  - Remoção de Dictionary<string, object>
+  - Documentação Swagger aprimorada
+
+- **Pipeline Behaviors**
+  - ValidationBehavior com NotificationContext
+  - LoggingBehavior estruturado
+  - TransactionBehavior (opcional)
+  - Order correto no pipeline
+
+### 🔧 A Modificar
+- **QueryBuilder.Domain.csproj**
+  - Adicionar MediatR package
+  - Adicionar FluentValidation.DependencyInjectionExtensions
+
+- **QueryBuilder.Infra.CrossCutting.IoC**
+  - Adicionar MediatR.Extensions.Microsoft.DependencyInjection
+  - Configurar Assembly scanning
+  - Registrar Behaviors
+  - Registrar NotificationContext como Scoped
+  - Registrar UnitOfWork como Scoped
+
+- **Repositories**
+  - Remover commits automáticos
+  - Adicionar IUnitOfWork nas assinaturas
+  - Deixar commit para Handlers
+
+- **Controllers**
+  - Remover try/catch manual
+  - Remover validações manuais (if/BadRequest)
+  - Usar apenas IMediator.Send()
+  - Confiar em filters globais
+
+### 📊 Impacto Previsto
+- **Linhas de código:** 7.550 → ~9.500 (+1.950 linhas)
+- **Arquivos criados:** 46 → ~65 (+19 arquivos)
+- **Progresso geral:** 75% → 85% (+10%)
+- **Complexidade:** Aumenta inicialmente, facilita manutenção a longo prazo
+- **Testabilidade:** Melhora significativamente (Handlers isolados)
+
+### 🎯 Benefícios
+- ✅ Alinhamento com padrão corporativo da empresa
+- ✅ Facilita manutenção por outros desenvolvedores
+- ✅ Validações automáticas via pipeline
+- ✅ Melhor separação de responsabilidades
+- ✅ Handlers testáveis isoladamente
+- ✅ Notification Pattern ao invés de exceptions
+- ✅ Controle transacional explícito
+- ✅ Código mais limpo e organizado
+
+### ⚠️ Riscos e Mitigações
+- **Risco:** Curva de aprendizado do MediatR
+  - **Mitigação:** Documentação detalhada + exemplos
+- **Risco:** Refatoração quebrar funcionalidades
+  - **Mitigação:** Testes de integração antes e depois
+- **Risco:** Overhead de performance
+  - **Mitigação:** Benchmarks e otimizações
+
+---
+
 ## [0.4.1] - 2025-11-15 (HOTFIX - Connection String)
 
 ### 🐛 Corrigido
