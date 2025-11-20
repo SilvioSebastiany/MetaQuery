@@ -170,7 +170,7 @@
                 "-ExecutionPolicy",
                 "Bypass",
                 "-File",
-                "${workspaceFolder}/debug-manager.ps1",
+                "${workspaceFolder}/docker/debug-manager.ps1",
                 "free"
             ],
             "options": {
@@ -192,7 +192,7 @@
                 "-ExecutionPolicy",
                 "Bypass",
                 "-File",
-                "${workspaceFolder}/debug-manager.ps1",
+                "${workspaceFolder}/docker/debug-manager.ps1",
                 "check"
             ],
             "options": {
@@ -214,7 +214,7 @@
                 "-ExecutionPolicy",
                 "Bypass",
                 "-File",
-                "${workspaceFolder}/debug-manager.ps1",
+                "${workspaceFolder}/docker/debug-manager.ps1",
                 "status"
             ],
             "options": {
