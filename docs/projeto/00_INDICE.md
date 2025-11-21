@@ -120,25 +120,29 @@ Esta documentação foi criada para:
 ## 📊 Progresso Geral do Projeto
 
 ```
-[████████████░░░░░░░░░░] 55% Concluído
+[████████████████░░░░░] 85% Concluído
 
 ✅ Fundação e Arquitetura: 100%
 ✅ Domain Layer: 100%
-✅ Infrastructure básica: 85%
-✅ API básica: 80%
-✅ Funcionalidades Core: 60%
-⏳ Testes: 0%
-⏳ Melhorias: 0%
+✅ Infrastructure básica: 100%
+✅ API básica: 100%
+✅ Funcionalidades Core: 100%
+✅ CQRS + MediatR: 60% (Queries prontas, Commands pendentes)
+✅ Padrão Herval: 100% (Controllers simplificados)
+✅ Organização de Código: 100% (Interfaces separadas)
+⏳ Testes: 25%
+⏳ Melhorias: 15%
 ```
 
-Última atualização: 13 de Novembro de 2025
+Última atualização: 20 de Novembro de 2025
 
-### 🎉 Últimas Implementações (v0.3.0)
-- ✅ QueryBuilderService completo com JOINs recursivos
-- ✅ QueryBuilderTestController para testes e debug
-- ✅ Script create-tables.sql com 6 tabelas e 35 registros
-- ✅ querybuilder-tests.http com 20+ casos de teste
-- ✅ Documentação atualizada e CHANGELOG criado
+### 🎉 Últimas Implementações (v0.5.4)
+- ✅ Controllers simplificados seguindo Padrão Herval (-64% código)
+- ✅ Interfaces separadas em arquivos individuais (1→5 arquivos)
+- ✅ Rotas duplicadas removidas
+- ✅ Tabela PAGAMENTOS criada com 10 registros
+- ✅ Suporte a FK composta documentado
+- ✅ CHANGELOG atualizado (v0.5.2, v0.5.3, v0.5.4)
 
 ---
 

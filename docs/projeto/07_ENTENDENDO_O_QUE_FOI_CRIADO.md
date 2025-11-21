@@ -49,6 +49,8 @@ oracle-db:
   image: gvenzl/oracle-xe:21-slim
 ```
 
+**Nota:** Este documento foca na infraestrutura Docker. Para detalhes sobre a arquitetura de código (controllers, interfaces, padrões), consulte **[04_STATUS_ATUAL.md](04_STATUS_ATUAL.md)**.
+
 **O que significa:**
 - **Nome do container:** `querybuilder-oracle-xe` (nome fixo para referência)
 - **Imagem:** Oracle Express Edition 21c (versão slim = menor)

@@ -3,20 +3,22 @@
 ## 📊 Progresso Geral
 
 ```
-[████████████████░░░░░] 82% Concluído
+[████████████████░░░░░] 85% Concluído
 
 ✅ Fundação e Arquitetura: 100%
 ✅ Domain Layer: 100%
 ✅ Infrastructure básica: 100%
-✅ API básica: 95%
+✅ API básica: 100%
 ✅ Funcionalidades Core: 100%
 ✅ CQRS + MediatR: 60% (Queries prontas, Commands pendentes)
 ✅ Performance e Type Safety: 100% (DTO tipado implementado)
-⏳ Testes: 20% (testes manuais realizados, automatizados pendentes)
-⏳ Melhorias: 10%
+✅ Padrão Herval: 100% (Controllers simplificados)
+✅ Organização de Código: 100% (Interfaces separadas)
+⏳ Testes: 25% (testes manuais realizados, automatizados pendentes)
+⏳ Melhorias: 15%
 ```
 
-**Última atualização:** 20 de Novembro de 2025 - Otimização de Performance
+**Última atualização:** 20 de Novembro de 2025 - Simplificação de Controllers e Organização de Interfaces
 
 ---
 
@@ -74,15 +76,19 @@ IoC → Domain, Data, Externals, CrossCutting
 ✅ Enum TipoJoin
 ```
 
-#### Interfaces
-**`IRepositories.cs`**
-```csharp
-✅ IMetadadosRepository
-✅ IQueryBuilderService
-✅ IIADataCatalogService
-✅ IValidacaoMetadadosService
-✅ IConsultaDinamicaRepository
+#### Interfaces (REORGANIZADAS) ✅
+**Estrutura:**
 ```
+Interfaces/
+├── Repositories/
+│   ├── IMetadadosRepository.cs (9 métodos)
+│   └── IConsultaDinamicaRepository.cs (4 métodos)
+├── IQueryBuilderService.cs (9 métodos)
+├── IIADataCatalogService.cs (4 métodos)
+└── IValidacaoMetadadosService.cs (4 métodos)
+```
+
+**Mudança:** Interfaces separadas em arquivos individuais seguindo padrão Herval (SRP)
 
 #### Services (100%) ✅
 **`QueryBuilderService.cs`** - Serviço de geração de queries
@@ -249,44 +255,44 @@ QueryBuilder.Domain/
 ✅ Middleware pipeline configurado
 ```
 
-#### MetadadosController.cs
+#### MetadadosController.cs (SIMPLIFICADO - Padrão Herval) ✅
 ```csharp
 ✅ GET /api/metadados/teste - Endpoint de teste
 ✅ GET /api/metadados - Listar todos
 ✅ GET /api/metadados/{id} - Buscar por ID
 ✅ GET /api/metadados/tabela/{nome} - Buscar por nome
 ✅ POST /api/metadados - Criar novo
-✅ DTOs de request/response
-✅ Tratamento de erros
-✅ Logging
-✅ Status codes corretos
+✅ Simplificado: 101 linhas (era 323, redução de 68%)
+✅ Padrão Herval: apenas IMediator injetado
+✅ Removido: INotificationContext, ILogger, try-catch manuais
+✅ Retornos diretos com operador ternário
 ```
 
-#### QueryBuilderTestController.cs (NOVO) ✅
+#### QueryBuilderTestController.cs (SIMPLIFICADO - Padrão Herval) ✅
 ```csharp
 ✅ GET /api/QueryBuilderTest/simples/{tabela} - Query sem JOINs
 ✅ GET /api/QueryBuilderTest/com-joins/{tabela} - Query com JOINs recursivos
 ✅ POST /api/QueryBuilderTest/com-filtros/{tabela} - Query com WHERE dinâmico
-✅ GET /api/QueryBuilderTest/tabelas-disponiveis - Lista metadados carregados
+✅ Simplificado: 67 linhas (era 176, redução de 62%)
 ✅ Parâmetro profundidade configurável para JOINs
 ✅ Compilação de SQL para debug
-✅ Validação de erros (tabela não encontrada)
-✅ Logging estruturado
+✅ Removido: ILogger, try-catch, rotas duplicadas
+✅ Padrão Herval: IQueryBuilderService + OracleCompiler apenas
 ```
 
-#### ConsultaDinamicaController.cs (NOVO) ✅
+#### ConsultaDinamicaController.cs (SIMPLIFICADO - Padrão Herval) ✅
 ```csharp
 ✅ GET /api/ConsultaDinamica/{tabela} - Consulta básica com JOINs opcionais
 ✅ POST /api/ConsultaDinamica/{tabela}/filtrar - Consulta com filtros dinâmicos
 ✅ GET /api/ConsultaDinamica/{tabela}/paginado - Consulta paginada
-✅ GET /api/ConsultaDinamica/tabelas-disponiveis - Lista tabelas permitidas
+✅ GET /api/ConsultaDinamica/tabelas-disponiveis - Lista tabelas permitidas (query repository)
+✅ Simplificado: 45 linhas (era 93, redução de 52%)
 ✅ Whitelist de segurança (6 tabelas: CLIENTES, PEDIDOS, PRODUTOS, etc.)
 ✅ Parâmetro incluirJoins configurável
 ✅ Parâmetro profundidade para controlar JOINs
 ✅ Paginação com metadata (page, pageSize, totalRecords, totalPages)
-✅ Validação de tabelas permitidas (case-insensitive)
-✅ Tratamento de erros com status codes corretos
-✅ Logging estruturado
+✅ Padrão Herval: IMediator + IMetadadosRepository apenas
+✅ Removido: INotificationContext, ILogger, try-catch desnecessários
 ```
 
 #### Pendente
@@ -311,17 +317,18 @@ QueryBuilder.Domain/
    - IDX_TABELA_DINAMICA_TABELA
    - IDX_TABELA_DINAMICA_ATIVO
    - IDX_TABELA_DINAMICA_VISIVEL
-✅ 6 registros de metadados:
+✅ 7 registros de metadados:
    - CLIENTES
    - PEDIDOS
    - PRODUTOS
    - ITENS_PEDIDO
    - CATEGORIAS
    - ENDERECOS
+   - PAGAMENTOS (NOVO) ⭐
 ✅ Queries de verificação
 ```
 
-**`create-tables.sql`** (NOVO) - Tabelas do e-commerce
+**`create-tables.sql`** - Tabelas do e-commerce
 ```sql
 ✅ 6 tabelas com relacionamentos completos
 ✅ Foreign Keys e constraints
@@ -336,6 +343,21 @@ QueryBuilder.Domain/
    - 9 itens de pedido
 ✅ Validação de integridade referencial
 ✅ Auto-increment com IDENTITY
+```
+
+**`create-table-pagamentos.sql`** (NOVO) ⭐ - Tabela de pagamentos
+```sql
+✅ PAGAMENTOS table com 10 colunas
+✅ FK para PEDIDOS (ID_PEDIDO)
+✅ Constraints: CHK_STATUS_PAGAMENTO, CHK_FORMA_PAGAMENTO
+✅ Índices: IDX_PAGAMENTOS_PEDIDO, IDX_PAGAMENTOS_STATUS
+✅ 10 registros de exemplo cobrindo múltiplos cenários:
+   - CREDITO, DEBITO, PIX, BOLETO, DINHEIRO
+   - Status: PENDENTE, APROVADO, RECUSADO, ESTORNADO
+   - Pagamentos parcelados e à vista
+   - Links para todos os 6 PEDIDOS
+✅ Insert em TABELA_DINAMICA com metadados
+✅ Suporte a FK composta documentado (formato: TABELA:FK1+FK2:PK1+PK2)
 ```
 
 **`check-table.sql`** e **`count-records.sql`**
@@ -564,21 +586,29 @@ QueryBuilder.Domain/
 ```
 Domain Layer:       ~750 linhas (+350 QueryBuilderService)
 Infrastructure:     ~500 linhas (+148 ConsultaDinamicaRepository)
-API Layer:          ~700 linhas (+180 QueryBuilderTest, +320 ConsultaDinamica com conversores)
-Scripts SQL:        ~750 linhas (+450 create-tables.sql, +100 verificação)
-Documentação:       ~4500 linhas (+1500)
+API Layer:          ~213 linhas (3 controllers simplificados, redução de 64%)
+  - MetadadosController: 101 linhas (era 323)
+  - ConsultaDinamicaController: 45 linhas (era 93)
+  - QueryBuilderTestController: 67 linhas (era 176)
+Scripts SQL:        ~1080 linhas (+329 create-table-pagamentos.sql)
+Documentação:       ~5000 linhas (+500 CHANGELOG v0.5.2, v0.5.3, v0.5.4)
 Testes HTTP:        ~350 linhas (querybuilder + consulta-dinamica)
-Total:              ~7550 linhas
+Total:              ~7893 linhas
 ```
 
 ### Arquivos Criados
 ```
-Arquivos .cs:       19 (+2 Repository, +1 Controller)
-Arquivos .sql:      6 (+3 scripts debug/verificação)
+Arquivos .cs:       24 (+5 interfaces separadas)
+  - Interfaces/Repositories/IMetadadosRepository.cs
+  - Interfaces/Repositories/IConsultaDinamicaRepository.cs
+  - Interfaces/IQueryBuilderService.cs
+  - Interfaces/IIADataCatalogService.cs
+  - Interfaces/IValidacaoMetadadosService.cs
+Arquivos .sql:      7 (+1 create-table-pagamentos.sql)
 Arquivos .http:     2 (querybuilder-tests + consulta-dinamica-tests)
-Arquivos .md:       11
+Arquivos .md:       11 (CHANGELOG atualizado com v0.5.2, v0.5.3, v0.5.4)
 Arquivos config:    8
-Total:              46 arquivos
+Total:              52 arquivos (+6)
 ```
 
 ---
@@ -586,10 +616,15 @@ Total:              46 arquivos
 ## 🔄 Última Build
 
 **Status:** ✅ Sucesso
-**Data:** 13/11/2025
+**Data:** 20/11/2025
 **Erros:** 0
-**Warnings:** 5 (avisos de lint - ProducesResponseType)
-**Tempo:** ~3.9s
+**Warnings:** 2 (avisos de lint menores)
+**Tempo:** ~3.2s (mais rápido com código simplificado)
+
+**Mudanças Recentes:**
+- Controllers simplificados (-64% linhas código)
+- Interfaces separadas em arquivos individuais
+- Rotas duplicadas removidas
 
 ```powershell
 dotnet build QueryBuilder.Solution.sln

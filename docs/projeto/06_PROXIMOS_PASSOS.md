@@ -10,16 +10,17 @@
 
 ---
 
-### 1. 🔴 SEMANA 1: MediatR + CQRS Base
+### 1. 🟡 SEMANA 1: MediatR + CQRS Base (PARCIALMENTE CONCLUÍDO)
 
 **Tempo estimado:** 5 dias
 **Complexidade:** ⭐⭐⭐⭐
+**Status:** Controllers já simplificados conforme padrão Herval ✅
 
 #### Dia 1: Setup e Pacotes
-- [ ] Instalar `MediatR` (12.x) no QueryBuilder.Domain
-- [ ] Instalar `MediatR.Extensions.Microsoft.DependencyInjection` no IoC
-- [ ] Instalar `FluentValidation` (já instalado, configurar uso)
-- [ ] Instalar `FluentValidation.DependencyInjectionExtensions`
+- [x] Instalar `MediatR` (13.1.0) no QueryBuilder.Domain ✅
+- [x] Instalar `MediatR.Extensions.Microsoft.DependencyInjection` no IoC ✅
+- [x] Instalar `FluentValidation` (12.1.0) ✅
+- [x] Instalar `FluentValidation.DependencyInjectionExtensions` ✅
 
 **Comandos:**
 ```powershell
@@ -92,10 +93,14 @@ public class ConsultaDinamicaQueryHandler
 - [ ] `ObterMetadadoPorTabelaQuery` + Handler
 - [ ] `ListarTabelasDisponiveisQuery` + Handler
 
-#### Dia 5: Refatorar Controllers
-- [ ] Injetar `IMediator` nos controllers
-- [ ] Substituir chamadas diretas para repositories/services por `mediator.Send(query)`
-- [ ] Remover injeção de repositories nos controllers
+#### Dia 5: Refatorar Controllers ✅ CONCLUÍDO
+- [x] Injetar `IMediator` nos controllers (ou IMediator + repository conforme necessário) ✅
+- [x] Simplificar controllers seguindo padrão Herval ✅
+- [x] Remover INotificationContext, ILogger, try-catch desnecessários ✅
+- [x] Controllers reduzidos de 592 para 213 linhas (-64%) ✅
+  - MetadadosController: 323 → 101 linhas
+  - ConsultaDinamicaController: 93 → 45 linhas
+  - QueryBuilderTestController: 176 → 67 linhas
 
 **Controller Refatorado:**
 ```csharp
@@ -424,6 +429,54 @@ public class UnitOfWork : IUnitOfWork
 - [ ] Behaviors registrados na ordem correta
 - [ ] NotificationContext como Scoped
 - [ ] UnitOfWork como Scoped
+
+---
+
+## ✅ CONCLUÍDO RECENTEMENTE
+
+### Organização de Código (Padrão Herval) ⭐
+
+**Completado:** 20 de Novembro de 2025
+
+#### Controllers Simplificados
+- ✅ MetadadosController: 323 → 101 linhas (-68%)
+- ✅ ConsultaDinamicaController: 93 → 45 linhas (-52%)
+- ✅ QueryBuilderTestController: 176 → 67 linhas (-62%)
+- ✅ Removido: INotificationContext, ILogger manuais, try-catch desnecessários
+- ✅ Padrão: Controllers injetam apenas IMediator (+ repository se necessário)
+- ✅ Retornos diretos com operadores ternários
+
+#### Interfaces Separadas
+- ✅ IRepositories.cs (1 arquivo monolítico) → 5 arquivos individuais
+- ✅ Estrutura organizada:
+  ```
+  Interfaces/
+  ├── Repositories/
+  │   ├── IMetadadosRepository.cs
+  │   └── IConsultaDinamicaRepository.cs
+  ├── IQueryBuilderService.cs
+  ├── IIADataCatalogService.cs
+  └── IValidacaoMetadadosService.cs
+  ```
+- ✅ SRP (Single Responsibility Principle) aplicado
+- ✅ Melhor navegação e manutenção
+
+#### Rotas Limpas
+- ✅ Removidas rotas duplicadas (tabelas-conhecidas, extra tabelas-disponiveis)
+- ✅ Rotas de teste mantidas apenas em QueryBuilderTestController
+- ✅ Rotas públicas em ConsultaDinamicaController (consulta banco diretamente)
+
+#### Dados de Teste Expandidos
+- ✅ Tabela PAGAMENTOS criada (10 registros)
+- ✅ FK para PEDIDOS implementada
+- ✅ Múltiplos cenários: CREDITO, DEBITO, PIX, BOLETO, DINHEIRO
+- ✅ Status variados: PENDENTE, APROVADO, RECUSADO, ESTORNADO
+- ✅ Metadados atualizados em TABELA_DINAMICA
+- ✅ Suporte a FK composta documentado (formato: TABELA:FK1+FK2:PK1+PK2)
+
+#### Documentação
+- ✅ CHANGELOG.md atualizado com versões 0.5.2, 0.5.3, 0.5.4
+- ✅ Todas as mudanças documentadas
 
 ---
 
