@@ -134,24 +134,25 @@ src/
 
 ## 📊 Progresso Geral
 ```
-[██████████████████░░░░] 85% Concluído
+[███████████████████░░] 95% Concluído
 
 ✅ Estrutura base: 100%
 ✅ Domain Entities: 100%
 ✅ Domain Interfaces: 100%
 ✅ Domain ValueObjects: 100%
 ✅ Domain Services: 100%
-✅ Domain DomainServices: 100% ⭐ NOVO
+✅ Domain DomainServices: 100%
 ✅ Domain CQRS (Queries): 100%
-✅ Domain CQRS (Commands): 0% (próxima fase)
+✅ Domain CQRS (Commands): 100% ⭐ COM UNIT OF WORK
 ✅ Domain Behaviors: 100%
 ✅ Domain Validators: 100%
 ✅ Domain Notifications: 100%
-✅ Infra.Data: 100%
-✅ API Controllers: 50% (1 de 2 refatorado)
+✅ Infra.Data Repositories: 100%
+✅ Infra.Data UnitOfWork: 100% ⭐ NOVO
+✅ API Controllers: 100% ⭐ AMBOS REFATORADOS
 ✅ IoC: 100%
 ✅ CrossCutting: 100%
-✅ Documentação: 100% ⭐ NOVO
+✅ Documentação: 100%
 ```
 
 ---
