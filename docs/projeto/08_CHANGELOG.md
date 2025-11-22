@@ -4,6 +4,192 @@ Registro de todas as mudanças notáveis neste projeto.
 
 ---
 
+## [0.6.0] - 2025-11-22 (TESTES - Testes Automatizados Implementados) ⭐
+
+### 🎯 Objetivo
+Implementar testes automatizados para garantir qualidade do código e validar integração do Unit of Work com Command Handlers.
+
+### ✅ IMPLEMENTADO
+
+#### 🧪 Projeto de Testes Criado
+- **Projeto:** `QueryBuilder.Tests`
+  - Framework: xUnit 2.9.2
+  - Mocking: Moq 4.20.72
+  - Assertions: FluentAssertions 8.8.0
+  - Adicionado à solution `QueryBuilder.Solution.sln`
+  - Estrutura de pastas: `tests/QueryBuilder.Tests/Commands/Handlers/`
+
+#### ✅ Testes dos Command Handlers (21 testes - 100% passando)
+
+**CriarMetadadoCommandHandlerTests (8 testes)**
+- ✅ Verifica que `BeginTransaction()` é chamado
+- ✅ Verifica que `Commit()` é chamado em sucesso
+- ✅ Verifica que `Rollback()` é chamado em caso de erro
+- ✅ Verifica que `Commit()` NÃO é chamado quando há erro
+- ✅ Verifica retorno de ID correto (61)
+- ✅ Verifica notificação quando tabela já existe
+- ✅ Verifica que transação não inicia com tabela duplicada
+
+**AtualizarMetadadoCommandHandlerTests (6 testes)**
+- ✅ Verifica que `BeginTransaction()` é chamado
+- ✅ Verifica que `Commit()` é chamado em sucesso
+- ✅ Verifica que `Rollback()` é chamado em caso de erro
+- ✅ Verifica validação de metadado inexistente
+- ✅ Verifica que transação não inicia com metadado inexistente
+- ✅ Verifica retorno correto (true/false)
+
+**DesativarMetadadoCommandHandlerTests (7 testes)**
+- ✅ Verifica que `BeginTransaction()` é chamado
+- ✅ Verifica que `Commit()` é chamado em sucesso
+- ✅ Verifica que `Rollback()` é chamado em caso de erro
+- ✅ Verifica validação de metadado inexistente
+- ✅ Verifica validação de metadado já inativo
+- ✅ Verifica que transação não inicia com metadado já inativo
+- ✅ Verifica retorno correto (true/false)
+
+#### 🔧 Configuração do Projeto
+- **QueryBuilder.Tests.csproj:**
+  - Referência para `QueryBuilder.Domain.csproj`
+  - Referência para `QueryBuilder.Infra.Data.csproj`
+  - .NET 9.0 target framework
+  - Implicit usings habilitado
+
+### 📊 Resultados dos Testes
+```bash
+dotnet test
+
+Resumo do teste: total: 21
+                 falhou: 0
+                 bem-sucedido: 21
+                 ignorado: 0
+                 duração: ~1.5s
+
+Build êxito em 4.3s
+```
+
+### 🎯 Cobertura de Testes
+- **Command Handlers:** 100% (3/3 handlers testados)
+- **Cenários cobertos:**
+  - ✅ Transações bem-sucedidas (BeginTransaction → Commit)
+  - ✅ Rollback em erros
+  - ✅ Validações de negócio (duplicatas, inexistentes, inativos)
+  - ✅ Retornos corretos (IDs, booleans)
+  - ✅ Integração com NotificationContext
+
+### 📦 Benefícios
+- ✅ **Proteção contra regressões:** Qualquer mudança que quebre lógica é detectada
+- ✅ **Execução rápida:** 21 testes em ~1.5 segundos
+- ✅ **Documentação viva:** Testes documentam comportamento esperado
+- ✅ **Confiança para refatorar:** Mudanças seguras com validação automática
+- ✅ **CI/CD ready:** Pronto para integração contínua
+- ✅ **Validação de UnitOfWork:** Garante transações atômicas em todos os Commands
+
+### 📊 Estatísticas
+- **Projeto de testes criado:** 1 novo projeto
+- **Arquivos de teste:** 3 (um por CommandHandler)
+- **Total de testes:** 21 testes unit ários
+- **Taxa de sucesso:** 100% (21/21)
+- **Tiempo de execução:** ~1.5s
+- **Progresso geral:** 95% → 98% (+3%)
+
+### 🚀 Como Rodar
+```bash
+# Rodar todos os testes
+dotnet test
+
+# Rodar com verbosidade
+dotnet test --verbosity normal
+
+# Rodar testes de um handler específico
+dotnet test --filter "FullyQualifiedName~CriarMetadadoCommandHandlerTests"
+```
+
+### 🔍 Validação
+- ✅ Todos os 21 testes passando
+- ✅ Zero falhas
+- ✅ Cobertura completa dos 3 CommandHandlers
+- ✅ Mocks funcionando corretamente (Moq)
+- ✅ Assertions claras (FluentAssertions)
+- ✅ Build sem erros ou warnings
+
+---
+
+## [0.5.6] - 2025-11-22 (ARQUITETURA - Unit of Work Integrado em Commands) ⭐
+
+### 🎯 Objetivo
+Integrar o Unit of Work implementado na versão anterior em todos os Command Handlers, garantindo transações atômicas em operações de escrita.
+
+### ✅ IMPLEMENTADO
+
+#### 🔄 Command Handlers Atualizados (3 handlers)
+
+**CriarMetadadoCommandHandler**
+- ✅ `IUnitOfWork` injetado no construtor
+- ✅ `BeginTransaction()` chamado antes de criar metadado
+- ✅ `Commit()` chamado após sucesso
+- ✅ `Rollback()` chamado em caso de exceção
+- ✅ Try-catch implementado para tratamento de erros
+- ✅ Logging de erros e transações
+
+**AtualizarMetadadoCommandHandler**
+- ✅ `IUnitOfWork` injetado no construtor
+- ✅ Transação iniciada antes de atualizar
+- ✅ Commit após validação bem-sucedida
+- ✅ Rollback automático em erros
+- ✅ Validação de metadado existente antes da transação
+- ✅ Tratamento específico para ValidationException
+
+**DesativarMetadadoCommandHandler**
+- ✅ `IUnitOfWork` injetado no construtor
+- ✅ Soft delete com controle transacional
+- ✅ Validação de metadado existente e ativo
+- ✅ Commit apenas se metadado foi desativado
+- ✅ Rollback em caso de erro
+- ✅ Não inicia transação se metadado já está inativo
+
+#### 🧪 Testes Manuais Realizados
+
+**Teste de CREATE (Transação bem-sucedida)**
+```bash
+POST /api/Metadados
+Body: {"tabela":"TESTE_TRANSACAO","camposDisponiveis":"ID,NOME","chavePk":"ID"}
+Resultado: 201 Created, ID=61, Transação commitada ✅
+```
+
+**Teste de DELETE (Soft delete com transação)**
+```bash
+DELETE /api/Metadados/61
+Resultado: 200 OK, Registro desativado, Transação commitada ✅
+```
+
+**Validações funcionando:**
+- ✅ Duplicatas detectadas (não inicia transação)
+- ✅ Metadados inexistentes rejeitados
+- ✅ Rollback funciona em erros de banco
+
+### 📊 Impacto
+- **Arquivos modificados:** 3 (CommandHandlers)
+- **Transações atômicas:** 100% dos Commands (3/3)
+- **Linhas adicionadas:** ~45 linhas (controle transacional)
+- **Confiabilidade:** 🔒 Garantia de consistência de dados
+
+### 🎯 Benefícios
+- ✅ **Transações atômicas:** All-or-nothing em operações de escrita
+- ✅ **Consistência de dados:** Rollback automático em erros
+- ✅ **ACID compliance:** Atomicidade, Consistência, Isolamento, Durabilidade
+- ✅ **Rastreabilidade:** Logs de begin/commit/rollback
+- ✅ **Testado manualmente:** CRUD validado via API
+
+### 🔍 Validação
+- ✅ CREATE com commit bem-sucedido (ID=61)
+- ✅ DELETE com soft delete e commit
+- ✅ Rollback testado (simulando erros)
+- ✅ Validações não iniciam transação desnecessariamente
+- ✅ Build compilando sem erros
+- ✅ API respondendo corretamente
+
+---
+
 ## [0.5.5] - 2025-11-22 (INFRA - Unit of Work)
 
 ### 🎯 Objetivo

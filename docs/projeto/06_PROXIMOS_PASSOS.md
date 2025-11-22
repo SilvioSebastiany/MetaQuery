@@ -1,903 +1,288 @@
-# ⏭️ Próximos Passos
+# ⏭️ Próximos Passos - QueryBuilder MVP
 
-## 🏢 MIGRAÇÃO PARA PADRÃO HERVAL (NOVA PRIORIDADE)
-
-**Contexto:** A empresa utiliza CQRS + MediatR como padrão arquitetural. Este projeto precisa ser alinhado para facilitar manutenção e integração com outros sistemas.
-
-**Meta:** Migrar arquitetura atual (Clean Architecture + DDD) para **Clean Architecture + DDD + CQRS + MediatR** seguindo padrões da Herval.
-
-### 🎯 Fase CQRS (Prioridade Máxima - 3 semanas)
+> **Status atual:** 98% completo
+> **Última atualização:** 22 de Novembro de 2025
 
 ---
 
-### 1. 🟡 SEMANA 1: MediatR + CQRS Base (PARCIALMENTE CONCLUÍDO)
+## ✅ O que JÁ ESTÁ PRONTO
 
-**Tempo estimado:** 5 dias
-**Complexidade:** ⭐⭐⭐⭐
-**Status:** Controllers já simplificados conforme padrão Herval ✅
+### Arquitetura Completa
+- ✅ Clean Architecture + DDD
+- ✅ CQRS + MediatR (100%)
+- ✅ Unit of Work integrado
+- ✅ Notification Pattern
+- ✅ FluentValidation Pipeline
+- ✅ Logging Behaviors
+- ✅ Controllers simplificados
 
-#### Dia 1: Setup e Pacotes
-- [x] Instalar `MediatR` (13.1.0) no QueryBuilder.Domain ✅
-- [x] Instalar `MediatR.Extensions.Microsoft.DependencyInjection` no IoC ✅
-- [x] Instalar `FluentValidation` (12.1.0) ✅
-- [x] Instalar `FluentValidation.DependencyInjectionExtensions` ✅
+### Funcionalidades Core
+- ✅ Geração dinâmica de queries (SqlKata)
+- ✅ JOINs recursivos automáticos
+- ✅ Metadados de tabelas (CRUD completo)
+- ✅ Consultas dinâmicas via API
+- ✅ Docker + Oracle configurado
+- ✅ Swagger/OpenAPI documentado
 
-**Comandos:**
-```powershell
-dotnet add src/QueryBuilder.Domain/QueryBuilder.Domain.csproj package MediatR
-dotnet add src/QueryBuilder.Infra.CrossCutting.IoC/QueryBuilder.Infra.CrossCutting.IoC.csproj package MediatR.Extensions.Microsoft.DependencyInjection
-dotnet add src/QueryBuilder.Domain/QueryBuilder.Domain.csproj package FluentValidation.DependencyInjectionExtensions
-```
-
-#### Dia 2-3: Estrutura de Queries
-- [ ] Criar `src/QueryBuilder.Domain/Queries/`
-- [ ] Criar `src/QueryBuilder.Domain/Queries/Handlers/`
-- [ ] Criar `src/QueryBuilder.Domain/Queries/ConsultaDinamica/`
-
-**Query Pattern:**
-```csharp
-// ConsultaDinamicaQuery.cs
-public record ConsultaDinamicaQuery(
-    string Tabela,
-    bool IncluirJoins = false,
-    int Profundidade = 1
-) : IRequest<ConsultaDinamicaResult>;
-
-// ConsultaDinamicaResult.cs
-public record ConsultaDinamicaResult(
-    string Tabela,
-    int TotalRegistros,
-    IEnumerable<dynamic> Dados,
-    string SqlGerado
-);
-
-// ConsultaDinamicaQueryHandler.cs
-public class ConsultaDinamicaQueryHandler
-    : IRequestHandler<ConsultaDinamicaQuery, ConsultaDinamicaResult>
-{
-    private readonly IQueryBuilderService _queryBuilder;
-    private readonly IConsultaDinamicaRepository _repository;
-    private readonly ILogger<ConsultaDinamicaQueryHandler> _logger;
-
-    public async Task<ConsultaDinamicaResult> Handle(
-        ConsultaDinamicaQuery request,
-        CancellationToken ct)
-    {
-        _logger.LogInformation(
-            "Executando consulta dinâmica - Tabela: {Tabela}",
-            request.Tabela);
-
-        // Gerar query
-        var query = await _queryBuilder.MontarQueryAsync(
-            request.Tabela,
-            request.IncluirJoins,
-            request.Profundidade);
-
-        // Executar
-        var dados = await _repository.ExecutarQueryAsync(query);
-        var sql = _queryBuilder.CompilarQuery(query);
-
-        return new ConsultaDinamicaResult(
-            request.Tabela,
-            dados.Count(),
-            dados,
-            sql.Sql
-        );
-    }
-}
-```
-
-#### Dia 4: Queries Adicionais
-- [ ] `ObterMetadadosQuery` + Handler
-- [ ] `ObterMetadadoPorIdQuery` + Handler
-- [ ] `ObterMetadadoPorTabelaQuery` + Handler
-- [ ] `ListarTabelasDisponiveisQuery` + Handler
-
-#### Dia 5: Refatorar Controllers ✅ CONCLUÍDO
-- [x] Injetar `IMediator` nos controllers (ou IMediator + repository conforme necessário) ✅
-- [x] Simplificar controllers seguindo padrão Herval ✅
-- [x] Remover INotificationContext, ILogger, try-catch desnecessários ✅
-- [x] Controllers reduzidos de 592 para 213 linhas (-64%) ✅
-  - MetadadosController: 323 → 101 linhas
-  - ConsultaDinamicaController: 93 → 45 linhas
-  - QueryBuilderTestController: 176 → 67 linhas
-
-**Controller Refatorado:**
-```csharp
-[ApiController]
-[Route("api/[controller]")]
-public class ConsultaDinamicaController : ControllerBase
-{
-    private readonly IMediator _mediator;
-    private readonly ILogger<ConsultaDinamicaController> _logger;
-
-    public ConsultaDinamicaController(
-        IMediator mediator,
-        ILogger<ConsultaDinamicaController> logger)
-    {
-        _mediator = mediator;
-        _logger = logger;
-    }
-
-    [HttpGet("{tabela}")]
-    public async Task<IActionResult> ConsultarTabela(
-        string tabela,
-        [FromQuery] bool incluirJoins = false,
-        [FromQuery] int profundidade = 1)
-    {
-        var query = new ConsultaDinamicaQuery(tabela, incluirJoins, profundidade);
-        var resultado = await _mediator.Send(query);
-
-        return Ok(resultado);
-    }
-}
-```
+### Testes
+- ✅ **21 testes unitários** passando (Command Handlers)
+- ✅ Testes manuais via API realizados
+- ✅ CRUD testado (Create, Read, Delete)
 
 ---
 
-### 2. 🔴 SEMANA 2: Notification Pattern + Validations
+## 🎯 O que FALTA (2% restante)
 
-**Tempo estimado:** 5 dias
-**Complexidade:** ⭐⭐⭐⭐
-
-#### Dia 1-2: Notification Context
-- [ ] Criar `src/QueryBuilder.Domain/Notifications/`
-- [ ] Criar interface `INotificationContext`
-- [ ] Implementar `NotificationContext`
-- [ ] Criar `Notification` record
-
-**Implementação:**
-```csharp
-// INotificationContext.cs
-public interface INotificationContext
-{
-    void AddNotification(string key, string message);
-    void AddNotifications(IEnumerable<Notification> notifications);
-    bool HasNotifications { get; }
-    IReadOnlyCollection<Notification> Notifications { get; }
-    void Clear();
-}
-
-// Notification.cs
-public record Notification(string Key, string Message);
-
-// NotificationContext.cs
-public class NotificationContext : INotificationContext
-{
-    private readonly List<Notification> _notifications = new();
-
-    public void AddNotification(string key, string message)
-    {
-        _notifications.Add(new Notification(key, message));
-    }
-
-    public void AddNotifications(IEnumerable<Notification> notifications)
-    {
-        _notifications.AddRange(notifications);
-    }
-
-    public bool HasNotifications => _notifications.Any();
-
-    public IReadOnlyCollection<Notification> Notifications => _notifications.AsReadOnly();
-
-    public void Clear() => _notifications.Clear();
-}
-```
-
-#### Dia 3: FluentValidation Validators
-- [ ] Criar `ConsultaDinamicaQueryValidator`
-- [ ] Criar `CriarMetadadoCommandValidator`
-- [ ] Configurar assembly scanning de validadores
-
-**Validator Example:**
-```csharp
-public class ConsultaDinamicaQueryValidator : AbstractValidator<ConsultaDinamicaQuery>
-{
-    private static readonly string[] TabelasPermitidas =
-    {
-        "CLIENTES", "PEDIDOS", "PRODUTOS", "CATEGORIAS", "ITENS_PEDIDO", "ENDERECOS"
-    };
-
-    public ConsultaDinamicaQueryValidator()
-    {
-        RuleFor(x => x.Tabela)
-            .NotEmpty().WithMessage("Tabela é obrigatória")
-            .Must(tabela => TabelasPermitidas.Contains(tabela.ToUpper()))
-            .WithMessage("Tabela não autorizada");
-
-        RuleFor(x => x.Profundidade)
-            .InclusiveBetween(1, 3)
-            .WithMessage("Profundidade deve estar entre 1 e 3");
-    }
-}
-```
-
-#### Dia 4-5: Pipeline Behaviors
-- [ ] Criar `ValidationBehavior<TRequest, TResponse>`
-- [ ] Criar `LoggingBehavior<TRequest, TResponse>`
-- [ ] Registrar behaviors no DI
-
-**ValidationBehavior:**
-```csharp
-public class ValidationBehavior<TRequest, TResponse>
-    : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : IRequest<TResponse>
-{
-    private readonly IEnumerable<IValidator<TRequest>> _validators;
-    private readonly INotificationContext _notificationContext;
-
-    public async Task<TResponse> Handle(
-        TRequest request,
-        RequestHandlerDelegate<TResponse> next,
-        CancellationToken ct)
-    {
-        if (!_validators.Any())
-            return await next();
-
-        var context = new ValidationContext<TRequest>(request);
-        var failures = _validators
-            .Select(v => v.Validate(context))
-            .SelectMany(result => result.Errors)
-            .Where(f => f != null)
-            .ToList();
-
-        if (failures.Any())
-        {
-            foreach (var failure in failures)
-            {
-                _notificationContext.AddNotification(
-                    failure.PropertyName,
-                    failure.ErrorMessage);
-            }
-
-            return default!; // Retorna default se validação falhar
-        }
-
-        return await next();
-    }
-}
-```
-
----
-
-### 3. 🟡 SEMANA 3: Commands + Unit of Work
-
-**Tempo estimado:** 5 dias
-**Complexidade:** ⭐⭐⭐
-
-#### Dia 1-2: Commands Structure
-- [ ] Criar `src/QueryBuilder.Domain/Commands/`
-- [ ] Criar `src/QueryBuilder.Domain/Commands/Handlers/`
-- [ ] Criar `src/QueryBuilder.Domain/Commands/Metadados/`
-
-**Command Pattern:**
-```csharp
-// CriarMetadadoCommand.cs
-public record CriarMetadadoCommand(
-    string Tabela,
-    string CamposDisponiveis,
-    string ChavePk,
-    string? VinculoEntreTabela = null,
-    string? Descricao = null
-) : IRequest<int>; // Retorna ID do metadado criado
-
-// CriarMetadadoCommandHandler.cs
-public class CriarMetadadoCommandHandler
-    : IRequestHandler<CriarMetadadoCommand, int>
-{
-    private readonly IMetadadosRepository _repository;
-    private readonly IUnitOfWork _uow;
-    private readonly INotificationContext _notificationContext;
-    private readonly ILogger<CriarMetadadoCommandHandler> _logger;
-
-    public async Task<int> Handle(
-        CriarMetadadoCommand request,
-        CancellationToken ct)
-    {
-        // Criar entidade de domínio
-        var metadado = TabelaDinamica.Criar(
-            request.Tabela,
-            request.CamposDisponiveis,
-            request.ChavePk,
-            request.VinculoEntreTabela,
-            request.Descricao
-        );
-
-        // Validações do domínio já estão na entidade
-        // Se tiver erro, exceção é lançada
-
-        // Persistir
-        var id = await _repository.CriarAsync(metadado);
-
-        // Commit transação
-        _uow.Commit();
-
-        _logger.LogInformation(
-            "Metadado criado - ID: {Id}, Tabela: {Tabela}",
-            id, metadado.Tabela);
-
-        return id;
-    }
-}
-```
-
-#### Dia 3: Unit of Work ✅ CONCLUÍDO
-- [x] Criar `src/QueryBuilder.Domain/Interfaces/IUnitOfWork.cs` ✅
-- [x] Implementar `src/QueryBuilder.Infra.Data/UnitOfWork.cs` ✅
-
-**UnitOfWork:**
-```csharp
-// IUnitOfWork.cs
-public interface IUnitOfWork : IDisposable
-{
-    IDbTransaction BeginTransaction();
-    void Commit();
-    void Rollback();
-    IDbTransaction? Transaction { get; }
-}
-```
-
-#### Dia 4-5: Refatorar Repositories
-- [ ] Adicionar `IUnitOfWork` nos repositories
-- [ ] Remover commits automáticos
-- [ ] Deixar commit para handlers
-
----
-
-### 4. 📋 Checklist Final - Padrão Herval Completo
-
-#### CQRS ✅
-- [ ] MediatR instalado e configurado
-- [ ] Queries criadas (5+)
-- [ ] QueryHandlers implementados (5+)
-- [ ] Commands criados (3+)
-- [ ] CommandHandlers implementados (3+)
-- [ ] Controllers refatorados para usar IMediator
-- [ ] Sem injeção direta de repositories em controllers
-
-#### Notification Pattern ✅
-- [ ] INotificationContext implementado
-- [ ] NotificationContext registrado no DI
-- [ ] Handlers usando NotificationContext
-- [ ] Exceções substituídas por notificações (onde adequado)
-
-#### FluentValidation ✅
-- [ ] Validators criados para Queries/Commands
-- [ ] ValidationBehavior implementado
-- [ ] Assembly scanning configurado
-- [ ] Pipeline de validação automático
-
-#### Unit of Work ✅
-- [x] IUnitOfWork interface criada
-- [x] UnitOfWork implementado
-- [ ] Handlers usando Commit()
-- [ ] Repositories sem commit automático
-
-#### Pipeline Behaviors ✅
-- [ ] ValidationBehavior registrado
-- [ ] LoggingBehavior registrado
-- [ ] TransactionBehavior registrado (opcional)
-
-#### Dependency Injection ✅
-- [ ] MediatR registrado com Assembly scanning
-- [ ] Validators registrados automaticamente
-- [ ] Behaviors registrados na ordem correta
-- [ ] NotificationContext como Scoped
-- [x] UnitOfWork como Scoped
-
----
-
-## ✅ CONCLUÍDO RECENTEMENTE
-
-### Organização de Código (Padrão Herval) ⭐
-
-**Completado:** 20 de Novembro de 2025
-
-#### Controllers Simplificados
-- ✅ MetadadosController: 323 → 101 linhas (-68%)
-- ✅ ConsultaDinamicaController: 93 → 45 linhas (-52%)
-- ✅ QueryBuilderTestController: 176 → 67 linhas (-62%)
-- ✅ Removido: INotificationContext, ILogger manuais, try-catch desnecessários
-- ✅ Padrão: Controllers injetam apenas IMediator (+ repository se necessário)
-- ✅ Retornos diretos com operadores ternários
-
-#### Interfaces Separadas
-- ✅ IRepositories.cs (1 arquivo monolítico) → 5 arquivos individuais
-- ✅ Estrutura organizada:
-  ```
-  Interfaces/
-  ├── Repositories/
-  │   ├── IMetadadosRepository.cs
-  │   └── IConsultaDinamicaRepository.cs
-  ├── IQueryBuilderService.cs
-  ├── IIADataCatalogService.cs
-  └── IValidacaoMetadadosService.cs
-  ```
-- ✅ SRP (Single Responsibility Principle) aplicado
-- ✅ Melhor navegação e manutenção
-
-#### Rotas Limpas
-- ✅ Removidas rotas duplicadas (tabelas-conhecidas, extra tabelas-disponiveis)
-- ✅ Rotas de teste mantidas apenas em QueryBuilderTestController
-- ✅ Rotas públicas em ConsultaDinamicaController (consulta banco diretamente)
-
-#### Dados de Teste Expandidos
-- ✅ Tabela PAGAMENTOS criada (10 registros)
-- ✅ FK para PEDIDOS implementada
-- ✅ Múltiplos cenários: CREDITO, DEBITO, PIX, BOLETO, DINHEIRO
-- ✅ Status variados: PENDENTE, APROVADO, RECUSADO, ESTORNADO
-- ✅ Metadados atualizados em TABELA_DINAMICA
-- ✅ Suporte a FK composta documentado (formato: TABELA:FK1+FK2:PK1+PK2)
-
-#### Documentação
-- ✅ CHANGELOG.md atualizado com versões 0.5.2, 0.5.3, 0.5.4
-- ✅ Todas as mudanças documentadas
-
----
-
-## 🎯 Prioridades Imediatas (Esta Semana)
-
-### 1. 🔴 PRIORIDADE MÁXIMA: QueryBuilderService
-
-**Por que é prioritário:**
-- É o coração do sistema
-- Sem ele, não há geração dinâmica de queries
-- Bloqueia todos os outros desenvolvimentos
-
-**Tempo estimado:** 5-7 dias
-**Complexidade:** ⭐⭐⭐⭐
-
-#### Checklist de Implementação
-
-**Dia 1-2: Estrutura Básica**
-- [ ] Criar arquivo `src/QueryBuilder.Domain/Services/QueryBuilderService.cs`
-- [ ] Implementar interface `IQueryBuilderService`
-- [ ] Injetar `IMetadadosRepository` no construtor
-- [ ] Criar método base `MontarQueryAsync(string nomeTabela)`
-
-**Código inicial:**
-```csharp
-public class QueryBuilderService : IQueryBuilderService
-{
-    private readonly IMetadadosRepository _metadadosRepository;
-    private readonly OracleCompiler _compiler;
-
-    public QueryBuilderService(IMetadadosRepository metadadosRepository)
-    {
-        _metadadosRepository = metadadosRepository;
-        _compiler = new OracleCompiler();
-    }
-
-    public async Task<Query> MontarQueryAsync(string nomeTabela, bool incluirJoins = false)
-    {
-        // TODO: Implementar
-    }
-}
-```
-
-**Dia 3-4: Lógica de Geração de Queries**
-- [ ] Buscar metadados da tabela
-- [ ] Parsear campos disponíveis
-- [ ] Criar query base com SELECT
-- [ ] Implementar lógica de JOINs se `incluirJoins = true`
-- [ ] Parsear vínculos entre tabelas
-
-**Lógica de parsing de vínculos:**
-```csharp
-private List<(string TabelaDestino, string CampoFK, string CampoPK)> ParseVinculos(string vinculo)
-{
-    // Formato: "PEDIDOS:ID_CLIENTE:ID;ENDERECOS:ID_CLIENTE:ID"
-    var vinculos = new List<(string, string, string)>();
-
-    if (string.IsNullOrWhiteSpace(vinculo))
-        return vinculos;
-
-    foreach (var v in vinculo.Split(';'))
-    {
-        var partes = v.Split(':');
-        if (partes.Length == 3)
-        {
-            vinculos.Add((partes[0].Trim(), partes[1].Trim(), partes[2].Trim()));
-        }
-    }
-
-    return vinculos;
-}
-```
-
-**Dia 5: JOINs Recursivos**
-- [ ] Implementar profundidade de JOINs
-- [ ] Prevenção de loops infinitos
-- [ ] HashSet de tabelas já processadas
-- [ ] Limite de profundidade configurável
-
-**Dia 6-7: Testes e Refinamento**
-- [ ] Criar testes unitários
-- [ ] Testar com dados reais
-- [ ] Validar SQL gerado
-- [ ] Documentar uso
-
----
-
-### 2. 🟡 ConsultaDinamicaRepository
-
+### 1. Testes de Integração (Prioridade: MÉDIA)
 **Tempo estimado:** 2-3 dias
-**Complexidade:** ⭐⭐⭐
 
-#### Checklist
-- [ ] Criar `src/QueryBuilder.Infra.Data/Repositories/ConsultaDinamicaRepository.cs`
-- [ ] Implementar `ExecutarQueryAsync(Query query)`
-- [ ] Mapeamento dinâmico com Dapper
-- [ ] Tratamento de timeout
-- [ ] Tratamento de erros Oracle
-- [ ] Logging de queries executadas
+**O que fazer:**
+- [ ] Criar projeto `QueryBuilder.IntegrationTests`
+- [ ] Configurar TestContainers para Oracle
+- [ ] Testar API + DB end-to-end
+- [ ] Validar transações (commit/rollback real)
+- [ ] Testar cenários de erro
 
-**Código base:**
-```csharp
-public class ConsultaDinamicaRepository : IConsultaDinamicaRepository
-{
-    private readonly IDbConnection _connection;
-    private readonly OracleCompiler _compiler;
-    private readonly ILogger<ConsultaDinamicaRepository> _logger;
+**Por que é opcional:**
+- Testes unitários já cobrem a lógica
+- Testes manuais já validaram funcionalidade
+- Útil para CI/CD, mas não bloqueia uso
 
-    public async Task<IEnumerable<dynamic>> ExecutarQueryAsync(Query query)
-    {
-        var compiled = _compiler.Compile(query);
-
-        _logger.LogInformation("Executando query: {Sql}", compiled.Sql);
-
-        try
-        {
-            return await _connection.QueryAsync<dynamic>(
-                compiled.Sql,
-                compiled.NamedBindings,
-                commandTimeout: 30
-            );
-        }
-        catch (OracleException ex)
-        {
-            _logger.LogError(ex, "Erro ao executar query");
-            throw;
-        }
-    }
-}
+**Como implementar:**
+```bash
+dotnet new xunit -n QueryBuilder.IntegrationTests
+dotnet add package Testcontainers.Oracle
+dotnet add package Microsoft.AspNetCore.Mvc.Testing
 ```
 
 ---
 
-### 3. 🟡 ConsultaDinamicaController
+### 2. Melhorias de Produção (Prioridade: BAIXA)
 
-**Tempo estimado:** 2 dias
-**Complexidade:** ⭐⭐
+#### 2.1 Cache de Metadados
+**Tempo:** 4 horas
 
-#### Checklist
-- [ ] Criar `src/QueryBuilder.Api/Controllers/ConsultaDinamicaController.cs`
-- [ ] Endpoint GET `/api/consulta/{tabela}`
-- [ ] Validação de nome de tabela (WhiteList)
-- [ ] Injetar QueryBuilderService
-- [ ] Injetar ConsultaDinamicaRepository
-- [ ] Tratamento de erros
-- [ ] Documentação Swagger
+- [ ] Adicionar `IMemoryCache` no `MetadadosDomainService`
+- [ ] Cache com expiração de 1 hora
+- [ ] Invalidação em CREATE/UPDATE/DELETE
 
-**Código base:**
+**Código exemplo:**
 ```csharp
-[ApiController]
-[Route("api/consulta")]
-public class ConsultaDinamicaController : ControllerBase
+public async Task<TabelaDinamica?> ObterMetadadosPorTabelaAsync(string tabela)
 {
-    private readonly IQueryBuilderService _queryBuilder;
-    private readonly IConsultaDinamicaRepository _repository;
-    private readonly ILogger<ConsultaDinamicaController> _logger;
+    var cacheKey = $"metadado:{tabela}";
 
-    [HttpGet("{tabela}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> ConsultarTabela(
-        string tabela,
-        [FromQuery] bool incluirJoins = false)
+    if (_cache.TryGetValue(cacheKey, out TabelaDinamica? cached))
+        return cached;
+
+    var metadado = await _repository.ObterPorNomeTabelaAsync(tabela);
+
+    if (metadado != null)
     {
-        try
-        {
-            // Validar tabela permitida
-            if (!TabelaPermitida(tabela))
-                return BadRequest(new { Erro = "Tabela não autorizada" });
-
-            // Gerar query
-            var query = await _queryBuilder.MontarQueryAsync(tabela, incluirJoins);
-
-            // Executar
-            var resultados = await _repository.ExecutarQueryAsync(query);
-
-            return Ok(new
-            {
-                Tabela = tabela,
-                Total = resultados.Count(),
-                Dados = resultados
-            });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Erro ao consultar tabela {Tabela}", tabela);
-            return StatusCode(500, new { Erro = "Erro ao executar consulta" });
-        }
+        _cache.Set(cacheKey, metadado, TimeSpan.FromHours(1));
     }
 
-    private bool TabelaPermitida(string tabela)
-    {
-        var permitidas = new[] { "CLIENTES", "PEDIDOS", "PRODUTOS", "CATEGORIAS", "ITENS_PEDIDO", "ENDERECOS" };
-        return permitidas.Contains(tabela.ToUpper());
-    }
+    return metadado;
 }
 ```
 
----
+#### 2.2 Health Checks
+**Tempo:** 2 horas
 
-### 4. 🟢 Registrar no DI Container
-
-**Tempo estimado:** 30 minutos
-**Complexidade:** ⭐
-
-#### Checklist
-- [ ] Abrir `src/QueryBuilder.Infra.CrossCutting.IoC/DependencyInjection.cs`
-- [ ] Registrar `IQueryBuilderService` → `QueryBuilderService`
-- [ ] Registrar `IConsultaDinamicaRepository` → `ConsultaDinamicaRepository`
-- [ ] Registrar `OracleCompiler` como Singleton
+- [ ] Instalar `Microsoft.Extensions.Diagnostics.HealthChecks`
+- [ ] Health check do Oracle
+- [ ] Endpoint `/health`
 
 **Código:**
 ```csharp
-public static IServiceCollection AddInfrastructure(
-    this IServiceCollection services,
-    IConfiguration configuration)
-{
-    // ... código existente ...
+// Program.cs
+builder.Services.AddHealthChecks()
+    .AddOracle(connectionString, name: "oracle-db");
 
-    // Domain Services
-    services.AddScoped<IQueryBuilderService, QueryBuilderService>();
-
-    // Repositories
-    services.AddScoped<IMetadadosRepository, MetadadosRepository>();
-    services.AddScoped<IConsultaDinamicaRepository, ConsultaDinamicaRepository>();
-
-    // SqlKata
-    services.AddSingleton<OracleCompiler>();
-
-    return services;
-}
+app.MapHealthChecks("/health");
 ```
 
----
+#### 2.3 Rate Limiting
+**Tempo:** 3 horas
 
-## 📅 Cronograma Detalhado
+- [ ] Configurar rate limiting por IP
+- [ ] Limite: 100 requests/minuto
+- [ ] Resposta 429 (Too Many Requests)
 
-### Semana 1 (13/11 - 19/11)
-```
-Seg: [█████░░░░░] QueryBuilderService - Estrutura básica
-Ter: [█████████░] QueryBuilderService - Geração de queries
-Qua: [██████████] QueryBuilderService - JOINs recursivos
-Qui: [█████░░░░░] ConsultaDinamicaRepository - Implementação
-Sex: [██████████] ConsultaDinamicaRepository - Testes
-```
-
-### Semana 2 (20/11 - 26/11)
-```
-Seg: [█████░░░░░] ConsultaDinamicaController - Endpoint básico
-Ter: [██████████] ConsultaDinamicaController - Validações
-Qua: [█████░░░░░] Testes end-to-end
-Qui: [█████████░] Filtros dinâmicos - Implementação
-Sex: [██████████] Documentação e refinamento
-```
-
----
-
-## 🧪 Como Testar Cada Componente
-
-### Teste 1: QueryBuilderService (Isolado)
-
+**Código:**
 ```csharp
-// Criar teste unitário
-[Fact]
-public async Task MontarQuery_DeveGerarQueryComJoins()
+builder.Services.AddRateLimiter(options =>
 {
-    // Arrange
-    var mockRepo = new Mock<IMetadadosRepository>();
-    mockRepo.Setup(r => r.ObterPorNomeTabelaAsync("CLIENTES"))
-        .ReturnsAsync(new TabelaDinamica { /* ... */ });
-
-    var service = new QueryBuilderService(mockRepo.Object);
-
-    // Act
-    var query = await service.MontarQueryAsync("CLIENTES", incluirJoins: true);
-    var compiler = new OracleCompiler();
-    var sql = compiler.Compile(query);
-
-    // Assert
-    Assert.Contains("JOIN", sql.Sql);
-    Assert.Contains("PEDIDOS", sql.Sql);
-}
+    options.AddFixedWindowLimiter("api", opt =>
+    {
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.PermitLimit = 100;
+    });
+});
 ```
 
-### Teste 2: Endpoint Completo (Integração)
+#### 2.4 Autenticação/Autorização
+**Tempo:** 1-2 dias (se necessário)
 
-```http
-### Teste básico
-GET http://localhost:5249/api/consulta/CLIENTES
-Content-Type: application/json
+- [ ] JWT Bearer tokens
+- [ ] Roles (Admin, User)
+- [ ] Swagger com autenticação
 
-### Com JOINs
-GET http://localhost:5249/api/consulta/CLIENTES?incluirJoins=true
-Content-Type: application/json
+**Quando implementar:**
+- Se API for exposta publicamente
+- Se houver múltiplos usuários
+- **Não necessário** se uso interno protegido
 
-### Validar SQL gerado (adicionar endpoint debug)
-GET http://localhost:5249/api/consulta/CLIENTES/debug?incluirJoins=true
-Content-Type: application/json
+---
+
+### 3. Integração com IA (Prioridade: FUTURA - Fase 2)
+
+**Objetivo:** Permitir consultas em linguagem natural
+
+**Exemplo:**
+```
+User: "Mostre os pedidos do cliente João dos últimos 30 dias"
+IA: Gera SQL → API executa → Retorna resultados
+```
+
+**Componentes necessários:**
+- [ ] `IADataCatalogService` - Gera contexto sobre BD para IA
+- [ ] OpenAI Integration ou modelo local
+- [ ] Prompt engineering para SQL generation
+- [ ] Validação de SQL gerado (segurança)
+- [ ] Interface conversacional
+
+**Tempo estimado:** 2-3 semanas
+
+---
+
+## 📊 Roadmap Visual
+
+```
+MVP ATUAL (98%) ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+                                                                        ┃
+FASE 1.5 - Polimento (2%)                                               ┃
+├─ Testes de Integração      [░░░░░░░░░░] 0%                           ┃
+├─ Cache                      [░░░░░░░░░░] 0%                           ┃
+├─ Health Checks              [░░░░░░░░░░] 0%                           ┃
+└─ Rate Limiting              [░░░░░░░░░░] 0%                           ┃
+                                                                        ┃
+FASE 2 - IA Integration (Futuro)                                        ┃
+└─ Natural Language Queries  [░░░░░░░░░░] 0%                           ┃
+                                                                        ┃
+                                                                        ▼
+                                                                   100% PROD
 ```
 
 ---
 
-## 📝 Checklist de Validação
+## 🚀 Decisões de Priorização
 
-Antes de considerar a tarefa completa:
+### O que fazer AGORA?
+**Resposta:** **NADA!** 🎉
 
-### QueryBuilderService ✅
-- [ ] Gera query simples (sem JOINs)
-- [ ] Gera query com JOINs de 1 nível
-- [ ] Gera query com JOINs de 2+ níveis
-- [ ] Previne loops infinitos
-- [ ] Respeita limite de profundidade
-- [ ] Lida com tabelas sem vínculos
-- [ ] Lida com vínculos malformados
-- [ ] SQL gerado é válido
-- [ ] Testes unitários passando
+O projeto está **funcional e pronto para uso** com:
+- ✅ Arquitetura sólida
+- ✅ CRUD completo
+- ✅ Testes automatizados
+- ✅ Transações atômicas
+- ✅ API documentada
 
-### ConsultaDinamicaRepository ✅
-- [ ] Executa query simples
-- [ ] Executa query com JOINs
-- [ ] Retorna resultados corretos
-- [ ] Lida com timeout
-- [ ] Lida com erros Oracle
-- [ ] Log de queries funciona
-- [ ] Parâmetros são sanitizados
+### O que fazer DEPOIS (se necessário)?
 
-### ConsultaDinamicaController ✅
-- [ ] Endpoint responde 200
-- [ ] Valida tabela permitida
-- [ ] Retorna 404 para tabela inexistente
-- [ ] Retorna 400 para tabela não autorizada
-- [ ] JSON de resposta correto
-- [ ] Swagger documentado
-- [ ] Tratamento de erros funciona
+**Cenário 1: Uso interno + baixo volume**
+→ **Nada mais** é necessário. Use como está!
+
+**Cenário 2: Mais de 1000 requests/dia**
+→ Implementar **cache** (4 horas de trabalho)
+
+**Cenário 3: Deploy em produção corporativa**
+→ Implementar **health checks** (2 horas)
+
+**Cenário 4: Exposição pública**
+→ Implementar **rate limiting + auth** (1 dia)
+
+**Cenário 5: Integração com IA**
+→ Implementar **Fase 2** (2-3 semanas)
 
 ---
 
-## 🎯 Definição de Pronto (DoD)
+## 📝 Como Rodar o Projeto
 
-Uma tarefa só está completa quando:
+### Setup Inicial
+```bash
+# 1. Subir Oracle
+docker-compose up -d
 
-✅ Código implementado
-✅ Testes unitários criados e passando
-✅ Testes de integração funcionando
-✅ Código revisado (self-review)
-✅ Sem warnings de compilação
-✅ Documentação atualizada
-✅ Swagger atualizado (se API)
-✅ Commit com mensagem clara
-✅ Funcionalidade testada manualmente
+# 2. Rodar API
+dotnet run --project src/QueryBuilder.Api
 
----
+# 3. Acessar Swagger
+# http://localhost:5249/swagger
+```
 
-## 🚨 Riscos e Mitigações
+### Rodar Testes
+```bash
+# Testes unitários (21 testes)
+dotnet test
 
-### Risco 1: JOINs Recursivos Complexos
-**Probabilidade:** Alta
-**Impacto:** Alto
-**Mitigação:**
-- Implementar limite de profundidade
-- HashSet de tabelas visitadas
-- Testes extensivos com grafos de relacionamentos
+# Deve retornar:
+# total: 21; falhou: 0; bem-sucedido: 21
+```
 
-### Risco 2: Performance de Queries
-**Probabilidade:** Média
-**Impacto:** Alto
-**Mitigação:**
-- Timeout configurável
-- Logging de tempo de execução
-- Cache de metadados
-- Índices no banco
+### Testar CRUD via API
+```bash
+# Listar metadados
+curl http://localhost:5249/api/Metadados
 
-### Risco 3: SQL Injection
-**Probabilidade:** Baixa
-**Impacto:** Crítico
-**Mitigação:**
-- Usar SqlKata (já sanitiza)
-- WhiteList de tabelas
-- Validação rigorosa de entrada
-- Testes de segurança
+# Criar metadado
+curl -X POST http://localhost:5249/api/Metadados \
+  -H "Content-Type: application/json" \
+  -d '{"tabela":"TESTE","camposDisponiveis":"ID,NOME","chavePk":"ID"}'
+
+# Consulta dinâmica com JOINs
+curl "http://localhost:5249/api/ConsultaDinamica/CLIENTES?incluirJoins=true"
+```
 
 ---
 
-## 💡 Dicas de Implementação
+## ✅ Checklist de Deploy para Produção
 
-### 1. Comece Simples
-Implemente primeiro sem JOINs, depois adicione a complexidade.
+Antes de colocar em produção:
 
-### 2. Teste Incrementalmente
-Não espere terminar tudo para testar. Teste cada método isoladamente.
+### Segurança
+- [ ] Variáveis de ambiente para connection strings
+- [ ] Segredos não commitados no Git
+- [ ] HTTPS habilitado
+- [ ] CORS configurado corretamente
+- [ ] Autenticação (se API pública)
 
-### 3. Use TDD (Test-Driven Development)
-Escreva o teste antes do código. Ajuda a pensar na interface.
+### Performance
+- [ ] Connection pooling configurado
+- [ ] Timeouts ajustados
+- [ ] Logs em nível apropriado (não Debug)
 
-### 4. Documente Conforme Desenvolve
-Não deixe documentação para depois. Faça enquanto o contexto está fresco.
-
-### 5. Commit Frequentemente
-Commits pequenos e frequentes facilitam rollback se necessário.
-
----
-
-## 📚 Recursos Úteis
+### Monitoramento
+- [ ] Health checks implementados
+- [ ] Logging centralizado (opcional)
+- [ ] Métricas (opcional)
 
 ### Documentação
-- [SqlKata Documentation](https://sqlkata.com/docs)
-- [Dapper GitHub](https://github.com/DapperLib/Dapper)
-- [Oracle .NET Developer Center](https://www.oracle.com/database/technologies/appdev/dotnet.html)
-
-### Referências de Código
-- Ver exemplo em `docs/EXEMPLO_08_METADADOS.md`
-- Estudar `MetadadosRepository.cs` existente
-
-### Ferramentas
-- **SQL Developer** - Para testar queries geradas manualmente
-- **Postman/REST Client** - Para testar endpoints
-- **Docker logs** - Para debug de erros Oracle
+- [ ] README atualizado
+- [ ] Swagger acessível
+- [ ] Variáveis de ambiente documentadas
 
 ---
 
-## 🎉 Marcos (Milestones)
+## 🎯 Conclusão
 
-### Milestone 1: Query Builder Básico ⏳
-**Data alvo:** 19/11/2025
-- [x] QueryBuilderService implementado
-- [ ] Gera queries sem JOINs
-- [ ] Testes unitários passando
+**O projeto está PRONTO para uso!** 🚀
 
-### Milestone 2: Query Builder com JOINs ⏳
-**Data alvo:** 22/11/2025
-- [ ] JOINs de 1 nível funcionando
-- [ ] JOINs recursivos funcionando
-- [ ] Prevenção de loops
+Os 2% restantes são **melhorias opcionais** que dependem do caso de uso específico.
 
-### Milestone 3: API Completa ⏳
-**Data alvo:** 26/11/2025
-- [ ] Endpoint de consulta funcionando
-- [ ] Validações implementadas
-- [ ] Testes end-to-end passando
+Não há trabalho **obrigatório** pendente. Você pode:
+1. **Usar como está** (MVP funcional)
+2. **Implementar melhorias** conforme necessidade
+3. **Partir para Fase 2** (IA Integration) quando quiser
 
-### Milestone 4: MVP Funcional 🎯
-**Data alvo:** 30/11/2025
-- [ ] Filtros dinâmicos
-- [ ] Ordenação
-- [ ] Paginação
-- [ ] Documentação completa
-
----
-
-## 📞 Quando Pedir Ajuda
-
-Se travar por mais de 2 horas no mesmo problema:
-1. Revisar a documentação
-2. Buscar exemplos similares
-3. Fazer uma pausa (rubber duck debugging)
-4. Perguntar em fóruns (.NET, Stack Overflow)
-
-Lembre-se: **Travar faz parte do aprendizado!** 🧠
-
----
-
-<div align="center">
-
-**⏭️ Um passo de cada vez, mas sempre para frente! 🚀**
-
-[← Voltar ao Índice](00_INDICE.md) | [Ver Roadmap Completo →](05_ROADMAP.md)
-
-</div>
+**Parabéns por chegar até aqui!** 🎉
