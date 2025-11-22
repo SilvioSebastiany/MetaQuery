@@ -12,15 +12,18 @@ namespace QueryBuilder.Domain.Commands.Handlers
     public class DesativarMetadadoCommandHandler : IRequestHandler<DesativarMetadadoCommand, bool>
     {
         private readonly IMetadadosRepository _repository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly INotificationContext _notificationContext;
         private readonly ILogger<DesativarMetadadoCommandHandler> _logger;
 
         public DesativarMetadadoCommandHandler(
             IMetadadosRepository repository,
+            IUnitOfWork unitOfWork,
             INotificationContext notificationContext,
             ILogger<DesativarMetadadoCommandHandler> logger)
         {
             _repository = repository;
+            _unitOfWork = unitOfWork;
             _notificationContext = notificationContext;
             _logger = logger;
         }
@@ -36,7 +39,7 @@ namespace QueryBuilder.Domain.Commands.Handlers
                 _notificationContext.AddNotification(
                     "NotFound",
                     $"Metadado com ID {request.Id} não encontrado");
-                
+
                 _logger.LogWarning("Tentativa de desativar metadado inexistente - ID: {Id}", request.Id);
                 return false;
             }
@@ -47,18 +50,24 @@ namespace QueryBuilder.Domain.Commands.Handlers
                 _notificationContext.AddNotification(
                     "JaDesativado",
                     $"Metadado com ID {request.Id} já está desativado");
-                
+
                 _logger.LogWarning("Tentativa de desativar metadado já inativo - ID: {Id}", request.Id);
                 return false;
             }
 
             try
             {
+                // Iniciar transação
+                _unitOfWork.BeginTransaction();
+
                 // Desativar entidade de domínio
                 metadado.Desativar();
 
                 // Persistir no banco
                 await _repository.AtualizarAsync(metadado);
+
+                // Commit da transação
+                _unitOfWork.Commit();
 
                 _logger.LogInformation(
                     "Metadado desativado com sucesso - ID: {Id}, Tabela: {Tabela}",
@@ -68,6 +77,9 @@ namespace QueryBuilder.Domain.Commands.Handlers
             }
             catch (Exception ex)
             {
+                // Rollback em caso de erro
+                _unitOfWork.Rollback();
+
                 _notificationContext.AddNotification("Erro", "Erro ao desativar metadado no banco de dados");
                 _logger.LogError(ex, "Erro ao desativar metadado ID: {Id}", request.Id);
                 return false;

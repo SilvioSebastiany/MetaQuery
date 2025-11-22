@@ -12,15 +12,18 @@ namespace QueryBuilder.Domain.Commands.Handlers
     public class AtualizarMetadadoCommandHandler : IRequestHandler<AtualizarMetadadoCommand, bool>
     {
         private readonly IMetadadosRepository _repository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly INotificationContext _notificationContext;
         private readonly ILogger<AtualizarMetadadoCommandHandler> _logger;
 
         public AtualizarMetadadoCommandHandler(
             IMetadadosRepository repository,
+            IUnitOfWork unitOfWork,
             INotificationContext notificationContext,
             ILogger<AtualizarMetadadoCommandHandler> logger)
         {
             _repository = repository;
+            _unitOfWork = unitOfWork;
             _notificationContext = notificationContext;
             _logger = logger;
         }
@@ -36,16 +39,19 @@ namespace QueryBuilder.Domain.Commands.Handlers
                 _notificationContext.AddNotification(
                     "NotFound",
                     $"Metadado com ID {request.Id} não encontrado");
-                
+
                 _logger.LogWarning("Tentativa de atualizar metadado inexistente - ID: {Id}", request.Id);
                 return false;
             }
 
             try
             {
+                // Iniciar transação
+                _unitOfWork.BeginTransaction();
+
                 // Atualizar entidade de domínio usando métodos de comportamento
                 metadado.AtualizarCampos(request.CamposDisponiveis);
-                
+
                 if (!string.IsNullOrWhiteSpace(request.VinculoEntreTabela))
                 {
                     metadado.AtualizarVinculo(request.VinculoEntreTabela);
@@ -61,6 +67,9 @@ namespace QueryBuilder.Domain.Commands.Handlers
                 // Persistir no banco
                 await _repository.AtualizarAsync(metadado);
 
+                // Commit da transação
+                _unitOfWork.Commit();
+
                 _logger.LogInformation(
                     "Metadado atualizado com sucesso - ID: {Id}, Tabela: {Tabela}",
                     metadado.Id, metadado.Tabela);
@@ -69,6 +78,9 @@ namespace QueryBuilder.Domain.Commands.Handlers
             }
             catch (ArgumentException ex)
             {
+                // Rollback em caso de erro de validação
+                _unitOfWork.Rollback();
+
                 // Exceções de validação do domínio viram notificações
                 _notificationContext.AddNotification("Validacao", ex.Message);
                 _logger.LogWarning(ex, "Erro de validação ao atualizar metadado ID: {Id}", request.Id);
@@ -76,6 +88,9 @@ namespace QueryBuilder.Domain.Commands.Handlers
             }
             catch (Exception ex)
             {
+                // Rollback em caso de qualquer erro
+                _unitOfWork.Rollback();
+
                 _notificationContext.AddNotification("Erro", "Erro ao atualizar metadado no banco de dados");
                 _logger.LogError(ex, "Erro ao atualizar metadado ID: {Id}", request.Id);
                 return false;

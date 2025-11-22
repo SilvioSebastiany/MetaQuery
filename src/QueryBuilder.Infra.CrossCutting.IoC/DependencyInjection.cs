@@ -41,6 +41,7 @@ namespace QueryBuilder.Infra.CrossCutting.IoC
             // Repositories
             services.AddScoped<IMetadadosRepository, MetadadosRepository>();
             services.AddScoped<IConsultaDinamicaRepository, ConsultaDinamicaRepository>();
+            services.AddScoped<IUnitOfWork, QueryBuilder.Infra.Data.UoW.UnitOfWork>();
 
             // Services (auxiliares)
             services.AddScoped<IQueryBuilderService, QueryBuilderService>();

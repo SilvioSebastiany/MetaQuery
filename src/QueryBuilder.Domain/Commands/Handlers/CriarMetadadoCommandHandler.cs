@@ -13,15 +13,18 @@ namespace QueryBuilder.Domain.Commands.Handlers
     public class CriarMetadadoCommandHandler : IRequestHandler<CriarMetadadoCommand, int>
     {
         private readonly IMetadadosRepository _repository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly INotificationContext _notificationContext;
         private readonly ILogger<CriarMetadadoCommandHandler> _logger;
 
         public CriarMetadadoCommandHandler(
             IMetadadosRepository repository,
+            IUnitOfWork unitOfWork,
             INotificationContext notificationContext,
             ILogger<CriarMetadadoCommandHandler> logger)
         {
             _repository = repository;
+            _unitOfWork = unitOfWork;
             _notificationContext = notificationContext;
             _logger = logger;
         }
@@ -37,13 +40,16 @@ namespace QueryBuilder.Domain.Commands.Handlers
                 _notificationContext.AddNotification(
                     nameof(request.Tabela),
                     $"Já existe um metadado cadastrado para a tabela '{request.Tabela}'");
-                
+
                 _logger.LogWarning("Tentativa de criar metadado duplicado para tabela: {Tabela}", request.Tabela);
                 return 0;
             }
 
             try
             {
+                // Iniciar transação
+                _unitOfWork.BeginTransaction();
+
                 // Criar entidade de domínio usando factory method
                 var metadado = TabelaDinamica.Criar(
                     tabela: request.Tabela,
@@ -58,6 +64,9 @@ namespace QueryBuilder.Domain.Commands.Handlers
                 // Persistir no banco
                 var id = await _repository.CriarAsync(metadado);
 
+                // Commit da transação
+                _unitOfWork.Commit();
+
                 _logger.LogInformation(
                     "Metadado criado com sucesso - ID: {Id}, Tabela: {Tabela}",
                     id, metadado.Tabela);
@@ -66,6 +75,9 @@ namespace QueryBuilder.Domain.Commands.Handlers
             }
             catch (ArgumentException ex)
             {
+                // Rollback em caso de erro de validação
+                _unitOfWork.Rollback();
+
                 // Exceções de validação do domínio viram notificações
                 _notificationContext.AddNotification("Validacao", ex.Message);
                 _logger.LogWarning(ex, "Erro de validação ao criar metadado para tabela: {Tabela}", request.Tabela);
@@ -73,6 +85,9 @@ namespace QueryBuilder.Domain.Commands.Handlers
             }
             catch (Exception ex)
             {
+                // Rollback em caso de qualquer erro
+                _unitOfWork.Rollback();
+
                 _notificationContext.AddNotification("Erro", "Erro ao criar metadado no banco de dados");
                 _logger.LogError(ex, "Erro ao criar metadado para tabela: {Tabela}", request.Tabela);
                 return 0;

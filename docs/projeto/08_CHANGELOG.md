@@ -4,6 +4,38 @@ Registro de todas as mudanças notáveis neste projeto.
 
 ---
 
+## [0.5.5] - 2025-11-22 (INFRA - Unit of Work)
+
+### 🎯 Objetivo
+Implementar o padrão Unit of Work para gerenciamento de transações, preparando o terreno para os Commands (escrita) do CQRS.
+
+### ✅ IMPLEMENTADO
+
+#### 🏗️ Unit of Work Pattern
+- **Interface `IUnitOfWork` criada:**
+  - `BeginTransaction()`
+  - `Commit()`
+  - `Rollback()`
+  - `Transaction` property (para uso do Dapper)
+  - `Dispose()`
+
+- **Implementação `UnitOfWork`:**
+  - Gerencia o ciclo de vida da `IDbTransaction`
+  - Garante que a conexão esteja aberta
+  - Tratamento de erros no Commit (Rollback automático)
+  - Limpeza de recursos no Dispose
+
+- **Injeção de Dependência:**
+  - Registrado como `Scoped` no `DependencyInjection.cs`
+  - Compartilha a mesma `IDbConnection` do request
+
+### 📊 Impacto
+- **Arquivos criados:** 2 (`IUnitOfWork.cs`, `UnitOfWork.cs`)
+- **Arquivos modificados:** 1 (`DependencyInjection.cs`)
+- **Preparação:** Infraestrutura pronta para suportar transações atômicas nos futuros CommandHandlers (Criar/Atualizar/Excluir)
+
+---
+
 ## [0.5.4] - 2025-11-20 (DATABASE - Nova Tabela PAGAMENTOS + Suporte FK Composta)
 
 ### 🎯 Objetivo

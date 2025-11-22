@@ -4,7 +4,7 @@
 
 ```
 ✅ Fase 1: Fundação              [████████████] 100%
-🚧 Fase 1.5: Arquitetural CQRS   [██░░░░░░░░░░]  20% ← EM ANDAMENTO
+🚧 Fase 1.5: Arquitetural CQRS   [██████░░░░░░]  50% ← EM ANDAMENTO
 🚧 Fase 2: Funcionalidades Core  [████░░░░░░░░]  30%
 ⏳ Fase 3: Qualidade             [░░░░░░░░░░░░]   0%
 ⏳ Fase 4: Melhorias             [░░░░░░░░░░░░]   0%
@@ -257,58 +257,26 @@ public class ValidationBehavior<TRequest, TResponse>
 Prioridade: 🟡 MÉDIA
 Complexidade: ⭐⭐⭐
 Tempo estimado: 2 dias
+Status: ✅ CONCLUÍDO
 ```
 
 **Tarefas:**
-- [ ] Criar interface IUnitOfWork
-- [ ] Implementar UnitOfWork para Dapper + Oracle
-- [ ] Registrar como Scoped no DI
+- [x] Criar interface IUnitOfWork
+- [x] Implementar UnitOfWork para Dapper + Oracle
+- [x] Registrar como Scoped no DI
 - [ ] Refatorar Handlers para usar CommitAsync()
 - [ ] Remover commits automáticos de repositories
-- [ ] Implementar Rollback em caso de erro
+- [x] Implementar Rollback em caso de erro
 - [ ] TransactionBehavior opcional
 
 **Implementação:**
 ```csharp
-public interface IUnitOfWork
+public interface IUnitOfWork : IDisposable
 {
-    Task<bool> CommitAsync(CancellationToken ct = default);
+    IDbTransaction BeginTransaction();
+    void Commit();
     void Rollback();
-}
-
-public class UnitOfWork : IUnitOfWork, IDisposable
-{
-    private readonly IDbConnection _connection;
-    private IDbTransaction? _transaction;
-
-    public UnitOfWork(IDbConnection connection)
-    {
-        _connection = connection;
-        if (_connection.State != ConnectionState.Open)
-            _connection.Open();
-        _transaction = _connection.BeginTransaction();
-    }
-
-    public async Task<bool> CommitAsync(CancellationToken ct = default)
-    {
-        try
-        {
-            _transaction?.Commit();
-            return true;
-        }
-        catch
-        {
-            _transaction?.Rollback();
-            throw;
-        }
-        finally
-        {
-            _transaction?.Dispose();
-            _transaction = null;
-        }
-    }
-
-    public void Dispose() => _transaction?.Dispose();
+    IDbTransaction? Transaction { get; }
 }
 ```
 

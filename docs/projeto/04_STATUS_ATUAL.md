@@ -3,22 +3,23 @@
 ## 📊 Progresso Geral
 
 ```
-[████████████████░░░░░] 85% Concluído
+[█████████████████░░░░] 88% Concluído
 
 ✅ Fundação e Arquitetura: 100%
 ✅ Domain Layer: 100%
 ✅ Infrastructure básica: 100%
 ✅ API básica: 100%
 ✅ Funcionalidades Core: 100%
-✅ CQRS + MediatR: 60% (Queries prontas, Commands pendentes)
+✅ CQRS + MediatR: 70% (Queries prontas, Unit of Work pronto, Commands pendentes)
 ✅ Performance e Type Safety: 100% (DTO tipado implementado)
 ✅ Padrão Herval: 100% (Controllers simplificados)
 ✅ Organização de Código: 100% (Interfaces separadas)
-⏳ Testes: 25% (testes manuais realizados, automatizados pendentes)
+✅ Unit of Work: 100% (Implementado e registrado)
+⏳ Testes: 30% (testes manuais realizados, automatizados pendentes)
 ⏳ Melhorias: 15%
 ```
 
-**Última atualização:** 20 de Novembro de 2025 - Simplificação de Controllers e Organização de Interfaces
+**Última atualização:** 22 de Novembro de 2025 - Implementação do Unit of Work
 
 ---
 
@@ -234,6 +235,18 @@ QueryBuilder.Domain/
 ✅ Timeout configurável (30s)
 ✅ Tratamento de exceções
 ✅ Logging estruturado
+```
+
+#### Infra.Data - Unit of Work (NOVO) ✅
+**`UnitOfWork.cs`** - Gerenciamento de transações
+```csharp
+✅ Implementa IUnitOfWork
+✅ Gerencia IDbTransaction do Dapper
+✅ BeginTransaction() - Inicia transação
+✅ Commit() - Confirma alterações
+✅ Rollback() - Desfaz alterações
+✅ Dispose() - Libera recursos
+✅ Registrado como Scoped no DI
 ```
 
 #### Pendente
@@ -616,15 +629,16 @@ Total:              52 arquivos (+6)
 ## 🔄 Última Build
 
 **Status:** ✅ Sucesso
-**Data:** 20/11/2025
+**Data:** 22/11/2025
 **Erros:** 0
-**Warnings:** 2 (avisos de lint menores)
-**Tempo:** ~3.2s (mais rápido com código simplificado)
+**Warnings:** 4 (avisos de versão do MediatR)
+**Tempo:** ~3.5s
 
 **Mudanças Recentes:**
+- Implementação do Unit of Work Pattern
+- Registro de IUnitOfWork no DI
 - Controllers simplificados (-64% linhas código)
 - Interfaces separadas em arquivos individuais
-- Rotas duplicadas removidas
 
 ```powershell
 dotnet build QueryBuilder.Solution.sln
@@ -690,10 +704,11 @@ dotnet build QueryBuilder.Solution.sln
    - [ ] AtualizarMetadadoCommand + Handler + Validator
    - [ ] DesativarMetadadoCommand + Handler + Validator
 
-6. 🔴 **Implementar Unit of Work** (PENDENTE)
-   - [ ] Criar IUnitOfWork interface
-   - [ ] Controle transacional explícito
-   - [ ] CommitAsync() pattern
+6. ✅ **Implementar Unit of Work** (CONCLUÍDO)
+   - ✅ Criar IUnitOfWork interface
+   - ✅ Implementar UnitOfWork com Dapper
+   - ✅ Registrar no DI Container
+   - ✅ Controle transacional explícito (Begin/Commit/Rollback)
 
 7. 🟡 **DTOs Request/Response** (PENDENTE)
    - [ ] Separar DTOs de entrada e saída

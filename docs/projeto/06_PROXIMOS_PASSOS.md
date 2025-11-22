@@ -310,7 +310,7 @@ public class CriarMetadadoCommandHandler
         var id = await _repository.CriarAsync(metadado);
 
         // Commit transação
-        await _uow.CommitAsync();
+        _uow.Commit();
 
         _logger.LogInformation(
             "Metadado criado - ID: {Id}, Tabela: {Tabela}",
@@ -321,64 +321,19 @@ public class CriarMetadadoCommandHandler
 }
 ```
 
-#### Dia 3: Unit of Work
-- [ ] Criar `src/QueryBuilder.Domain/Interfaces/IUnitOfWork.cs`
-- [ ] Implementar `src/QueryBuilder.Infra.Data/UnitOfWork.cs`
+#### Dia 3: Unit of Work ✅ CONCLUÍDO
+- [x] Criar `src/QueryBuilder.Domain/Interfaces/IUnitOfWork.cs` ✅
+- [x] Implementar `src/QueryBuilder.Infra.Data/UnitOfWork.cs` ✅
 
 **UnitOfWork:**
 ```csharp
 // IUnitOfWork.cs
-public interface IUnitOfWork
+public interface IUnitOfWork : IDisposable
 {
-    Task<bool> CommitAsync(CancellationToken ct = default);
+    IDbTransaction BeginTransaction();
+    void Commit();
     void Rollback();
-}
-
-// UnitOfWork.cs (para Dapper com Oracle)
-public class UnitOfWork : IUnitOfWork
-{
-    private readonly IDbConnection _connection;
-    private IDbTransaction? _transaction;
-
-    public UnitOfWork(IDbConnection connection)
-    {
-        _connection = connection;
-        if (_connection.State != ConnectionState.Open)
-            _connection.Open();
-
-        _transaction = _connection.BeginTransaction();
-    }
-
-    public async Task<bool> CommitAsync(CancellationToken ct = default)
-    {
-        try
-        {
-            _transaction?.Commit();
-            return true;
-        }
-        catch
-        {
-            _transaction?.Rollback();
-            throw;
-        }
-        finally
-        {
-            _transaction?.Dispose();
-            _transaction = null;
-        }
-    }
-
-    public void Rollback()
-    {
-        _transaction?.Rollback();
-        _transaction?.Dispose();
-        _transaction = null;
-    }
-
-    public void Dispose()
-    {
-        _transaction?.Dispose();
-    }
+    IDbTransaction? Transaction { get; }
 }
 ```
 
@@ -413,9 +368,9 @@ public class UnitOfWork : IUnitOfWork
 - [ ] Pipeline de validação automático
 
 #### Unit of Work ✅
-- [ ] IUnitOfWork interface criada
-- [ ] UnitOfWork implementado
-- [ ] Handlers usando CommitAsync()
+- [x] IUnitOfWork interface criada
+- [x] UnitOfWork implementado
+- [ ] Handlers usando Commit()
 - [ ] Repositories sem commit automático
 
 #### Pipeline Behaviors ✅
@@ -428,7 +383,7 @@ public class UnitOfWork : IUnitOfWork
 - [ ] Validators registrados automaticamente
 - [ ] Behaviors registrados na ordem correta
 - [ ] NotificationContext como Scoped
-- [ ] UnitOfWork como Scoped
+- [x] UnitOfWork como Scoped
 
 ---
 
