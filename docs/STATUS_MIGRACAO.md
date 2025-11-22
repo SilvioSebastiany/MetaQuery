@@ -128,42 +128,6 @@ src/
 
 ### Fase 7: Testes
 - [ ] Unit tests
-- [ ] Integration tests
-
----
-
-## 📊 Progresso Geral
-```
-[███████████████████░░] 95% Concluído
-
-✅ Estrutura base: 100%
-✅ Domain Entities: 100%
-✅ Domain Interfaces: 100%
-✅ Domain ValueObjects: 100%
-✅ Domain Services: 100%
-✅ Domain DomainServices: 100%
-✅ Domain CQRS (Queries): 100%
-✅ Domain CQRS (Commands): 100% ⭐ COM UNIT OF WORK
-✅ Domain Behaviors: 100%
-✅ Domain Validators: 100%
-✅ Domain Notifications: 100%
-✅ Infra.Data Repositories: 100%
-✅ Infra.Data UnitOfWork: 100% ⭐ NOVO
-✅ API Controllers: 100% ⭐ AMBOS REFATORADOS
-✅ IoC: 100%
-✅ CrossCutting: 100%
-✅ Documentação: 100%
-```
-
----
-
-## 🎉 NOVA IMPLEMENTAÇÃO: CQRS + MediatR (Fase 1.5)
-
-### ✅ Pacotes Instalados:
-- **MediatR 13.1.0** (Domain + IoC)
-- **MediatR.Extensions.Microsoft.DependencyInjection 11.1.0** (IoC)
-- **FluentValidation.DependencyInjectionExtensions 12.1.0** (Domain)
-
 ### ✅ Estrutura CQRS Criada:
 ```
 QueryBuilder.Domain/

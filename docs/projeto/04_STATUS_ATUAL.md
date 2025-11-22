@@ -496,11 +496,31 @@ QueryBuilder.Domain/
 - [ ] Testar filtros complexos combinados
 - [ ] Verificar performance com profundidade 3
 
-### Testes Automatizados (Pendente) ❌
-- [ ] Testes unitários dos Handlers
-- [ ] Testes unitários do UnitOfWork (mocks)
-- [ ] Testes de integração
-- [ ] Testes de performance
+### Testes Automatizados ✅ **21 TESTES PASSANDO** ⭐ NOVO
+**Projeto de Testes:**
+- [x] QueryBuilder.Tests criado
+- [x] xUnit, Moq, FluentAssertions instalados
+- [x] Estrutura de pastas configurada
+
+**Command Handlers Testados:**
+- [x] CriarMetadadoCommandHandlerTests (8 testes)
+  - Verificação de BeginTransaction
+  - Verificação de Commit em sucesso
+  - Verificação de Rollback em erro
+  - Validação de duplicatas
+  - Retorno de ID correto
+- [x] AtualizarMetadadoCommandHandlerTests (6 testes)
+  - Verificação de UnitOfWork em todas operações
+  - Validação de metadado inexistente
+- [x] DesativarMetadadoCommandHandlerTests (7 testes)
+  - Verificação de soft delete com transação
+  - Validação de metadado já inativo
+
+**Resultado:**
+```bash
+dotnet test
+# total: 21; falhou: 0; bem-sucedido: 21; ignorado: 0
+```
 
 ---
 
