@@ -109,7 +109,7 @@ querybuilder/
 ├── docker-compose.yaml              # Orquestração dos containers
 ├── .dockerignore                    # Arquivos ignorados no build
 ├── src/
-│   └── QueryBuilder.Api/
+│   └── MetaQuery.Api/
 │       └── Dockerfile               # Build da API .NET
 └── Exemplos/
     └── script_tabela_dinamica.sql   # Script de inicialização do DB
@@ -181,7 +181,7 @@ netstat -ano | findstr :1521
 **Solução:**
 ```bash
 # Testar build localmente primeiro
-dotnet build QueryBuilder.Solution.sln
+dotnet build MetaQuery.Solution.sln
 
 # Limpar cache do Docker
 docker-compose build --no-cache querybuilder-api

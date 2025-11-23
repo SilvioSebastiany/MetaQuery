@@ -139,14 +139,14 @@ querybuilder-api:
   container_name: querybuilder-api
   build:
     context: .
-    dockerfile: src/QueryBuilder.Api/Dockerfile
+    dockerfile: src/MetaQuery.Api/Dockerfile
 ```
 
 **O que significa:**
 - **Nome:** `querybuilder-api`
 - **Build:** Constrói a partir do Dockerfile
 - **Context:** Raiz do projeto (`.`)
-- **Dockerfile:** `src/QueryBuilder.Api/Dockerfile`
+- **Dockerfile:** `src/MetaQuery.Api/Dockerfile`
 
 ### Portas Mapeadas
 
@@ -222,7 +222,7 @@ restart: unless-stopped
 
 ## 📁 Dockerfile da API - Multi-Stage Build
 
-### Localização: `src/QueryBuilder.Api/Dockerfile`
+### Localização: `src/MetaQuery.Api/Dockerfile`
 
 Este Dockerfile usa **3 estágios** para otimização:
 
@@ -240,8 +240,8 @@ WORKDIR /src
 ### Copiando Projetos
 
 ```dockerfile
-COPY ["src/QueryBuilder.Api/QueryBuilder.Api.csproj", "QueryBuilder.Api/"]
-COPY ["src/QueryBuilder.Domain/QueryBuilder.Domain.csproj", "QueryBuilder.Domain/"]
+COPY ["src/MetaQuery.Api/MetaQuery.Api.csproj", "MetaQuery.Api/"]
+COPY ["src/MetaQuery.Domain/MetaQuery.Domain.csproj", "MetaQuery.Domain/"]
 # ... outros projetos
 ```
 
@@ -253,7 +253,7 @@ COPY ["src/QueryBuilder.Domain/QueryBuilder.Domain.csproj", "QueryBuilder.Domain
 ### Restaurando Dependências
 
 ```dockerfile
-RUN dotnet restore "QueryBuilder.Api/QueryBuilder.Api.csproj"
+RUN dotnet restore "MetaQuery.Api/MetaQuery.Api.csproj"
 ```
 
 **O que faz:**
@@ -271,8 +271,8 @@ COPY src/ .
 ### Building
 
 ```dockerfile
-WORKDIR "/src/QueryBuilder.Api"
-RUN dotnet build "QueryBuilder.Api.csproj" -c Release -o /app/build
+WORKDIR "/src/MetaQuery.Api"
+RUN dotnet build "MetaQuery.Api.csproj" -c Release -o /app/build
 ```
 
 **O que faz:**
@@ -283,7 +283,7 @@ RUN dotnet build "QueryBuilder.Api.csproj" -c Release -o /app/build
 
 ```dockerfile
 FROM build AS publish
-RUN dotnet publish "QueryBuilder.Api.csproj" -c Release -o /app/publish
+RUN dotnet publish "MetaQuery.Api.csproj" -c Release -o /app/publish
 ```
 
 **O que faz:**
@@ -300,7 +300,7 @@ EXPOSE 8080
 EXPOSE 8081
 
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "QueryBuilder.Api.dll"]
+ENTRYPOINT ["dotnet", "MetaQuery.Api.dll"]
 ```
 
 **O que faz:**
@@ -365,7 +365,7 @@ docker volume rm querybuilder_oracle-data
 
 ## ⚙️ Configurações da API
 
-### Arquivo: `src/QueryBuilder.Api/appsettings.json`
+### Arquivo: `src/MetaQuery.Api/appsettings.json`
 
 ```json
 {
@@ -487,11 +487,11 @@ Configurações de debug para diferentes cenários.
 
 ```json
 {
-  "name": "QueryBuilder.Api - Debug (HTTP)",
+  "name": "MetaQuery.Api - Debug (HTTP)",
   "type": "coreclr",
   "request": "launch",
   "preLaunchTask": "prepare-api-debug",
-  "program": "${workspaceFolder}/src/QueryBuilder.Api/bin/Debug/net9.0/QueryBuilder.Api.dll",
+  "program": "${workspaceFolder}/src/MetaQuery.Api/bin/Debug/net9.0/MetaQuery.Api.dll",
   "env": {
     "ASPNETCORE_ENVIRONMENT": "Development",
     "ASPNETCORE_URLS": "http://localhost:5249"
@@ -527,7 +527,7 @@ Browser abre http://localhost:5249/swagger
 
 ```json
 {
-  "name": "QueryBuilder.Api - Attach to Container",
+  "name": "MetaQuery.Api - Attach to Container",
   "type": "coreclr",
   "request": "attach"
 }
@@ -642,12 +642,12 @@ Tasks automatizadas para desenvolvimento.
 ## 🗂️ Estrutura de Arquivos Docker
 
 ```
-QueryBuilderMVP/
+MetaQuery/
 ├── docker-compose.yaml              # Orquestração principal
 ├── debug-manager.ps1                # Script de gerenciamento
 │
 ├── src/
-│   └── QueryBuilder.Api/
+│   └── MetaQuery.Api/
 │       ├── Dockerfile              # Build da API
 │       ├── appsettings.json        # Configurações
 │       └── Program.cs              # Entry point

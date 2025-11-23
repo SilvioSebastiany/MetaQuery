@@ -188,7 +188,7 @@ Content-Type: application/json
 ### Novos Arquivos a Criar
 
 ```
-QueryBuilder.Domain/
+MetaQuery.Domain/
 ├── Commands/
 │   └── NaturalQuery/
 │       ├── NaturalQueryCommand.cs              ⭐ NOVO
@@ -221,11 +221,11 @@ QueryBuilder.Domain/
     └── Repositories/
         └── IHistoricoConsultasRepository.cs    ⭐ NOVO
 
-QueryBuilder.Infra.Data/
+MetaQuery.Infra.Data/
 └── Repositories/
     └── HistoricoConsultasRepository.cs         ⭐ NOVO
 
-QueryBuilder.Infra.Externals/
+MetaQuery.Infra.Externals/
 ├── OpenAI/
 │   ├── OpenAIService.cs                        ⭐ NOVO
 │   ├── OpenAISettings.cs                       ⭐ NOVO
@@ -236,11 +236,11 @@ QueryBuilder.Infra.Externals/
 └── PromptTemplates/
     └── sql-generation-prompt.txt               ⭐ NOVO
 
-QueryBuilder.Api/
+MetaQuery.Api/
 └── Controllers/
     └── NaturalQueryController.cs               ⭐ NOVO
 
-QueryBuilder.Tests/
+MetaQuery.Tests/
 └── Commands/Handlers/
     └── NaturalQueryCommandHandlerTests.cs      ⭐ NOVO
 
@@ -296,10 +296,10 @@ COMMENT ON COLUMN HISTORICO_CONSULTAS.TOKENS_USADOS IS 'Total de tokens consumid
 
 ```bash
 # OpenAI SDK
-dotnet add src/QueryBuilder.Infra.Externals package Azure.AI.OpenAI
+dotnet add src/MetaQuery.Infra.Externals package Azure.AI.OpenAI
 
 # HTTP Client (se usar API REST manual)
-dotnet add src/QueryBuilder.Infra.Externals package Microsoft.Extensions.Http
+dotnet add src/MetaQuery.Infra.Externals package Microsoft.Extensions.Http
 ```
 
 #### 1.3 Configurar Settings
@@ -324,8 +324,8 @@ dotnet add src/QueryBuilder.Infra.Externals package Microsoft.Extensions.Http
 
 **User Secrets (desenvolvimento):**
 ```bash
-dotnet user-secrets init --project src/QueryBuilder.Api
-dotnet user-secrets set "OpenAI:ApiKey" "sk-your-api-key-here" --project src/QueryBuilder.Api
+dotnet user-secrets init --project src/MetaQuery.Api
+dotnet user-secrets set "OpenAI:ApiKey" "sk-your-api-key-here" --project src/MetaQuery.Api
 ```
 
 ---
@@ -334,10 +334,10 @@ dotnet user-secrets set "OpenAI:ApiKey" "sk-your-api-key-here" --project src/Que
 
 #### 2.1 Entity: HistoricoConsulta
 
-**Arquivo:** `QueryBuilder.Domain/Entities/HistoricoConsulta.cs`
+**Arquivo:** `MetaQuery.Domain/Entities/HistoricoConsulta.cs`
 
 ```csharp
-namespace QueryBuilder.Domain.Entities;
+namespace MetaQuery.Domain.Entities;
 
 /// <summary>
 /// Entity que representa uma consulta em linguagem natural processada pela IA
@@ -403,12 +403,12 @@ public class HistoricoConsulta
 
 #### 2.2 Command: NaturalQueryCommand
 
-**Arquivo:** `QueryBuilder.Domain/Commands/NaturalQuery/NaturalQueryCommand.cs`
+**Arquivo:** `MetaQuery.Domain/Commands/NaturalQuery/NaturalQueryCommand.cs`
 
 ```csharp
 using MediatR;
 
-namespace QueryBuilder.Domain.Commands.NaturalQuery;
+namespace MetaQuery.Domain.Commands.NaturalQuery;
 
 /// <summary>
 /// Command para processar consulta em linguagem natural
@@ -437,10 +437,10 @@ public record NaturalQueryCommand : IRequest<NaturalQueryResult>
 }
 ```
 
-**Arquivo:** `QueryBuilder.Domain/Commands/NaturalQuery/NaturalQueryResult.cs`
+**Arquivo:** `MetaQuery.Domain/Commands/NaturalQuery/NaturalQueryResult.cs`
 
 ```csharp
-namespace QueryBuilder.Domain.Commands.NaturalQuery;
+namespace MetaQuery.Domain.Commands.NaturalQuery;
 
 /// <summary>
 /// Resultado de uma consulta em linguagem natural
@@ -472,13 +472,13 @@ public record MetadadosResposta
 
 #### 3.1 IADataCatalogService
 
-**Arquivo:** `QueryBuilder.Domain/DomainServices/IADataCatalogService.cs`
+**Arquivo:** `MetaQuery.Domain/DomainServices/IADataCatalogService.cs`
 
 ```csharp
-using QueryBuilder.Domain.Interfaces.Repositories;
+using MetaQuery.Domain.Interfaces.Repositories;
 using Microsoft.Extensions.Logging;
 
-namespace QueryBuilder.Domain.DomainServices;
+namespace MetaQuery.Domain.DomainServices;
 
 /// <summary>
 /// Serviço responsável por gerar contexto sobre o banco de dados para a IA

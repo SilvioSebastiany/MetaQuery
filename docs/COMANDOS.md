@@ -43,7 +43,7 @@ dotnet build -c Release
 
 ```bash
 # Todos os testes
-cd QueryBuilder.Tests
+cd MetaQuery.Tests
 dotnet test
 
 # Testes com detalhes
@@ -310,10 +310,10 @@ dotnet new --list
 ```bash
 # Adicionar referência
 cd MeuProjeto
-dotnet add reference ../QueryBuilder/QueryBuilder.csproj
+dotnet add reference ../QueryBuilder/MetaQuery.csproj
 
 # Remover referência
-dotnet remove reference ../QueryBuilder/QueryBuilder.csproj
+dotnet remove reference ../QueryBuilder/MetaQuery.csproj
 
 # Listar referências
 dotnet list reference

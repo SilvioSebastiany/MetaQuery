@@ -1,4 +1,4 @@
-# 📝 Changelog - QueryBuilder MVP
+# 📝 Changelog - MetaQuery
 
 Registro de todas as mudanças notáveis neste projeto.
 
@@ -12,12 +12,12 @@ Implementar testes automatizados para garantir qualidade do código e validar in
 ### ✅ IMPLEMENTADO
 
 #### 🧪 Projeto de Testes Criado
-- **Projeto:** `QueryBuilder.Tests`
+- **Projeto:** `MetaQuery.Tests`
   - Framework: xUnit 2.9.2
   - Mocking: Moq 4.20.72
   - Assertions: FluentAssertions 8.8.0
-  - Adicionado à solution `QueryBuilder.Solution.sln`
-  - Estrutura de pastas: `tests/QueryBuilder.Tests/Commands/Handlers/`
+  - Adicionado à solution `MetaQuery.Solution.sln`
+  - Estrutura de pastas: `tests/MetaQuery.Tests/Commands/Handlers/`
 
 #### ✅ Testes dos Command Handlers (21 testes - 100% passando)
 
@@ -48,9 +48,9 @@ Implementar testes automatizados para garantir qualidade do código e validar in
 - ✅ Verifica retorno correto (true/false)
 
 #### 🔧 Configuração do Projeto
-- **QueryBuilder.Tests.csproj:**
-  - Referência para `QueryBuilder.Domain.csproj`
-  - Referência para `QueryBuilder.Infra.Data.csproj`
+- **MetaQuery.Tests.csproj:**
+  - Referência para `MetaQuery.Domain.csproj`
+  - Referência para `MetaQuery.Infra.Data.csproj`
   - .NET 9.0 target framework
   - Implicit usings habilitado
 
@@ -409,7 +409,7 @@ Simplificar controllers seguindo o padrão corporativo Herval - remover complexi
   - `IncludeXmlComments()` para exibir comentários `/// <summary>`
   - Documentação automática dos endpoints no Swagger UI
 
-- **QueryBuilder.Api.csproj configurado**
+- **MetaQuery.Api.csproj configurado**
   - `<GenerateDocumentationFile>true</GenerateDocumentationFile>`
   - `<NoWarn>$(NoWarn);1591</NoWarn>` (suprime warnings de membros não documentados)
   - Arquivo XML gerado automaticamente no build
@@ -669,7 +669,7 @@ Migrar arquitetura para padrão corporativo com CQRS + MediatR + FluentValidatio
   - DomainServices registrados como Scoped
 
 #### 📦 Packages NuGet Adicionados
-- **QueryBuilder.Domain.csproj**
+- **MetaQuery.Domain.csproj**
   - `MediatR` v13.1.0 - Mediator pattern
   - `FluentValidation` v12.1.0 - Validações fluentes
   - `FluentValidation.DependencyInjectionExtensions` v12.1.0 - DI integration
@@ -817,11 +817,11 @@ Migrar arquitetura para padrão corporativo da empresa (Herval) com CQRS + Media
   - Order correto no pipeline
 
 ### 🔧 A Modificar
-- **QueryBuilder.Domain.csproj**
+- **MetaQuery.Domain.csproj**
   - Adicionar MediatR package
   - Adicionar FluentValidation.DependencyInjectionExtensions
 
-- **QueryBuilder.Infra.CrossCutting.IoC**
+- **MetaQuery.Infra.CrossCutting.IoC**
   - Adicionar MediatR.Extensions.Microsoft.DependencyInjection
   - Configurar Assembly scanning
   - Registrar Behaviors
@@ -1001,7 +1001,7 @@ Migrar arquitetura para padrão corporativo da empresa (Herval) com CQRS + Media
   - Adicionado registro de `OracleCompiler` (Singleton)
   - Importado namespace `SqlKata.Compilers`
 
-- **QueryBuilder.Domain.csproj**
+- **MetaQuery.Domain.csproj**
   - Adicionado pacote `Microsoft.Extensions.Logging.Abstractions` v9.0.0
 
 - **docker-compose.yaml**
@@ -1030,7 +1030,7 @@ Migrar arquitetura para padrão corporativo da empresa (Herval) com CQRS + Media
 ### ✨ Adicionado
 - **Estrutura completa do projeto**
   - 6 projetos .NET 9.0 organizados em Clean Architecture
-  - Solution `QueryBuilder.Solution.sln`
+  - Solution `MetaQuery.Solution.sln`
 
 - **Domain Layer**
   - Entity `TabelaDinamica` com DDD (agregado raiz)

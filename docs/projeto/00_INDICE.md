@@ -1,6 +1,6 @@
 # 📚 Índice da Documentação do Projeto
 
-## 📋 Documentação Completa do QueryBuilder MVP
+## 📋 Documentação Completa do MetaQuery
 
 Esta pasta contém toda a documentação do projeto, organizada por categoria.
 

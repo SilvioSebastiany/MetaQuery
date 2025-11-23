@@ -10,7 +10,7 @@
 
 #### 3.2 IAQueryGeneratorService
 
-**Arquivo:** `QueryBuilder.Infra.Externals/OpenAI/OpenAIService.cs`
+**Arquivo:** `MetaQuery.Infra.Externals/OpenAI/OpenAIService.cs`
 
 ```csharp
 using Azure.AI.OpenAI;
@@ -18,7 +18,7 @@ using Azure;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace QueryBuilder.Infra.Externals.OpenAI;
+namespace MetaQuery.Infra.Externals.OpenAI;
 
 /// <summary>
 /// Serviço de integração com OpenAI para geração de SQL
@@ -160,10 +160,10 @@ Converta a pergunta acima em uma query SQL Oracle válida usando apenas as tabel
 }
 ```
 
-**Arquivo:** `QueryBuilder.Infra.Externals/OpenAI/OpenAISettings.cs`
+**Arquivo:** `MetaQuery.Infra.Externals/OpenAI/OpenAISettings.cs`
 
 ```csharp
-namespace QueryBuilder.Infra.Externals.OpenAI;
+namespace MetaQuery.Infra.Externals.OpenAI;
 
 public class OpenAISettings
 {
@@ -177,12 +177,12 @@ public class OpenAISettings
 
 #### 3.3 SQLValidatorService
 
-**Arquivo:** `QueryBuilder.Domain/Services/SQLValidatorService.cs`
+**Arquivo:** `MetaQuery.Domain/Services/SQLValidatorService.cs`
 
 ```csharp
 using Microsoft.Extensions.Logging;
 
-namespace QueryBuilder.Domain.Services;
+namespace MetaQuery.Domain.Services;
 
 /// <summary>
 /// Valida SQL gerado pela IA antes de executar
@@ -334,21 +334,21 @@ public class SQLValidatorService
 
 #### 4.1 NaturalQueryCommandHandler
 
-**Arquivo:** `QueryBuilder.Domain/Commands/Handlers/NaturalQueryCommandHandler.cs`
+**Arquivo:** `MetaQuery.Domain/Commands/Handlers/NaturalQueryCommandHandler.cs`
 
 ```csharp
 using MediatR;
-using QueryBuilder.Domain.Commands.NaturalQuery;
-using QueryBuilder.Domain.DomainServices;
-using QueryBuilder.Domain.Services;
-using QueryBuilder.Domain.Interfaces;
-using QueryBuilder.Domain.Entities;
-using QueryBuilder.Infra.Externals.OpenAI;
-using QueryBuilder.Infra.Data.Repositories;
+using MetaQuery.Domain.Commands.NaturalQuery;
+using MetaQuery.Domain.DomainServices;
+using MetaQuery.Domain.Services;
+using MetaQuery.Domain.Interfaces;
+using MetaQuery.Domain.Entities;
+using MetaQuery.Infra.Externals.OpenAI;
+using MetaQuery.Infra.Data.Repositories;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 
-namespace QueryBuilder.Domain.Commands.Handlers;
+namespace MetaQuery.Domain.Commands.Handlers;
 
 /// <summary>
 /// Handler para processar consultas em linguagem natural
@@ -492,14 +492,14 @@ public class NaturalQueryCommandHandler : IRequestHandler<NaturalQueryCommand, N
 
 #### 5.1 Controller
 
-**Arquivo:** `QueryBuilder.Api/Controllers/NaturalQueryController.cs`
+**Arquivo:** `MetaQuery.Api/Controllers/NaturalQueryController.cs`
 
 ```csharp
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using QueryBuilder.Domain.Commands.NaturalQuery;
+using MetaQuery.Domain.Commands.NaturalQuery;
 
-namespace QueryBuilder.Api.Controllers;
+namespace MetaQuery.Api.Controllers;
 
 /// <summary>
 /// Controller para consultas em linguagem natural
@@ -552,14 +552,14 @@ public class NaturalQueryController : ControllerBase
 
 #### 6.1 HistoricoConsultasRepository
 
-**Arquivo:** `QueryBuilder.Infra.Data/Repositories/HistoricoConsultasRepository.cs`
+**Arquivo:** `MetaQuery.Infra.Data/Repositories/HistoricoConsultasRepository.cs`
 
 ```csharp
 using Dapper;
-using QueryBuilder.Domain.Entities;
+using MetaQuery.Domain.Entities;
 using System.Data;
 
-namespace QueryBuilder.Infra.Data.Repositories;
+namespace MetaQuery.Infra.Data.Repositories;
 
 public interface IHistoricoConsultasRepository
 {
@@ -688,7 +688,7 @@ public class NaturalQueryController : ControllerBase { }
 
 ### Testes Unitários
 
-**Arquivo:** `QueryBuilder.Tests/Commands/Handlers/NaturalQueryCommandHandlerTests.cs`
+**Arquivo:** `MetaQuery.Tests/Commands/Handlers/NaturalQueryCommandHandlerTests.cs`
 
 ```csharp
 [Fact]

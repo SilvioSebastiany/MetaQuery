@@ -1,4 +1,4 @@
-# 🗺️ Roadmap - QueryBuilder MVP
+# 🗺️ Roadmap - MetaQuery
 
 > **Status Atual:** 98% Completo ✅
 > **Última Atualização:** 22 de Novembro de 2025
@@ -127,7 +127,7 @@
 ### Entregas Realizadas
 
 #### Projeto de Testes ✅
-- ✅ QueryBuilder.Tests criado
+- ✅ MetaQuery.Tests criado
 - ✅ xUnit 2.9.2
 - ✅ Moq 4.20.72
 - ✅ FluentAssertions 8.8.0
@@ -161,7 +161,7 @@ Tempo: ~1.5s
 
 ### O que fazer
 
-- [ ] Criar projeto QueryBuilder.IntegrationTests
+- [ ] Criar projeto MetaQuery.IntegrationTests
 - [ ] Configurar TestContainers para Oracle
 - [ ] Testes end-to-end (API + DB)
 - [ ] Validar transações reais (commit/rollback)

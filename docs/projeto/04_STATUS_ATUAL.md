@@ -28,14 +28,14 @@
 ### 1. Estrutura do Projeto (100%) ✅
 
 #### Solution e Projetos
-- [x] `QueryBuilder.Solution.sln` criada
+- [x] `MetaQuery.Solution.sln` criada
 - [x] 6 projetos .NET criados:
-  - `QueryBuilder.Api` - Web API
-  - `QueryBuilder.Domain` - Camada de domínio
-  - `QueryBuilder.Infra.Data` - Acesso a dados
-  - `QueryBuilder.Infra.Externals` - Serviços externos
-  - `QueryBuilder.Infra.CrossCutting` - Recursos compartilhados
-  - `QueryBuilder.Infra.CrossCutting.IoC` - Injeção de dependência
+  - `MetaQuery.Api` - Web API
+  - `MetaQuery.Domain` - Camada de domínio
+  - `MetaQuery.Infra.Data` - Acesso a dados
+  - `MetaQuery.Infra.Externals` - Serviços externos
+  - `MetaQuery.Infra.CrossCutting` - Recursos compartilhados
+  - `MetaQuery.Infra.CrossCutting.IoC` - Injeção de dependência
 
 #### Referências entre Projetos
 ```
@@ -154,7 +154,7 @@ Interfaces/
 
 #### Estrutura de Pastas
 ```
-QueryBuilder.Domain/
+MetaQuery.Domain/
 ├── Entities/           ✅ TabelaDinamica
 ├── ValueObjects/       ✅ CampoTabela, VinculoTabela, etc
 ├── Interfaces/         ✅ Repositories + Services + IUnitOfWork ⭐
@@ -498,7 +498,7 @@ QueryBuilder.Domain/
 
 ### Testes Automatizados ✅ **21 TESTES PASSANDO** ⭐ NOVO
 **Projeto de Testes:**
-- [x] QueryBuilder.Tests criado
+- [x] MetaQuery.Tests criado
 - [x] xUnit, Moq, FluentAssertions instalados
 - [x] Estrutura de pastas configurada
 
@@ -526,20 +526,20 @@ dotnet test
 
 ## 📦 Pacotes NuGet Instalados
 
-### QueryBuilder.Api
+### MetaQuery.Api
 ```xml
 ✅ Microsoft.AspNetCore.OpenApi (9.0.0)
 ✅ Swashbuckle.AspNetCore (7.2.0)
 ```
 
-### QueryBuilder.Domain
+### MetaQuery.Domain
 ```xml
 ✅ FluentValidation (12.1.0)
 ✅ Microsoft.Extensions.Logging.Abstractions (9.0.0) - NOVO
 ✅ SqlKata (4.0.1)
 ```
 
-### QueryBuilder.Infra.Data
+### MetaQuery.Infra.Data
 ```xml
 ✅ Dapper (2.1.66)
 ✅ Oracle.ManagedDataAccess.Core (23.7.0)
@@ -547,12 +547,12 @@ dotnet test
 ✅ SqlKata.Execution (4.0.1)
 ```
 
-### QueryBuilder.Infra.CrossCutting
+### MetaQuery.Infra.CrossCutting
 ```xml
 ✅ Microsoft.Extensions.Configuration.Abstractions
 ```
 
-### QueryBuilder.Infra.CrossCutting.IoC
+### MetaQuery.Infra.CrossCutting.IoC
 ```xml
 ✅ Microsoft.Extensions.DependencyInjection.Abstractions
 ```
@@ -672,7 +672,7 @@ Total:              52 arquivos (+6)
 - Documentação atualizada (95% completo)
 
 ```powershell
-dotnet build QueryBuilder.Solution.sln
+dotnet build MetaQuery.Solution.sln
 # Build succeeded.
 #   0 Error(s)
 #   4 Warning(s)

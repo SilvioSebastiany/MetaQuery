@@ -1,4 +1,4 @@
-# 🎯 Implementação CQRS + MediatR - QueryBuilder MVP
+# 🎯 Implementação CQRS + MediatR - MetaQuery
 
 ## 📅 Data: Novembro 18, 2025
 
@@ -41,11 +41,11 @@ Controller → IMediator.Send(Query)
 ## 📦 Pacotes Instalados
 
 ```xml
-<!-- QueryBuilder.Domain.csproj -->
+<!-- MetaQuery.Domain.csproj -->
 <PackageReference Include="MediatR" Version="13.1.0" />
 <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.0" />
 
-<!-- QueryBuilder.Infra.CrossCutting.IoC.csproj -->
+<!-- MetaQuery.Infra.CrossCutting.IoC.csproj -->
 <PackageReference Include="MediatR" Version="13.1.0" />
 <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.1.0" />
 ```
@@ -57,7 +57,7 @@ Controller → IMediator.Send(Query)
 ## 📁 Estrutura de Arquivos Criada
 
 ```
-QueryBuilder.Domain/
+MetaQuery.Domain/
 ├── Queries/                              ← NOVA
 │   ├── ConsultaDinamicaQuery.cs         ✅ Record com IRequest<TResponse>
 │   └── Handlers/
@@ -162,7 +162,7 @@ public class ConsultaDinamicaQueryHandler
         try
         {
             // 1. Montar query SQL
-            var sqlQuery = _queryBuilder.MontarQuery(
+            var sqlQuery = _MetaQuery.MontarQuery(
                 request.Tabela,
                 request.IncluirJoins,
                 request.Profundidade
@@ -445,7 +445,7 @@ public static IServiceCollection AddInfrastructure(
     services.AddScoped<INotificationContext, NotificationContext>();
 
     // MediatR com Assembly Scanning
-    var domainAssembly = Assembly.Load("QueryBuilder.Domain");
+    var domainAssembly = Assembly.Load("MetaQuery.Domain");
     services.AddMediatR(cfg =>
     {
         cfg.RegisterServicesFromAssembly(domainAssembly);
@@ -561,7 +561,7 @@ public class UnitOfWork : IUnitOfWork
    └─ Chama: await next()
 
 6. ConsultaDinamicaQueryHandler:
-   ├─ Chama: _queryBuilder.MontarQuery("CLIENTES", true, 2)
+   ├─ Chama: _MetaQuery.MontarQuery("CLIENTES", true, 2)
    ├─ SQL gerado: "SELECT C.*, P.* FROM CLIENTES C LEFT JOIN PEDIDOS P..."
    ├─ Chama: _repository.ExecutarConsultaAsync(sqlQuery)
    ├─ Banco retorna: 150 registros

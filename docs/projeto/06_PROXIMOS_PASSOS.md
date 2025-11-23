@@ -1,4 +1,4 @@
-# ⏭️ Próximos Passos - QueryBuilder MVP
+# ⏭️ Próximos Passos - MetaQuery
 
 > **Status atual:** 98% completo
 > **Última atualização:** 22 de Novembro de 2025
@@ -37,7 +37,7 @@
 **Tempo estimado:** 2-3 dias
 
 **O que fazer:**
-- [ ] Criar projeto `QueryBuilder.IntegrationTests`
+- [ ] Criar projeto `MetaQuery.IntegrationTests`
 - [ ] Configurar TestContainers para Oracle
 - [ ] Testar API + DB end-to-end
 - [ ] Validar transações (commit/rollback real)
@@ -50,7 +50,7 @@
 
 **Como implementar:**
 ```bash
-dotnet new xunit -n QueryBuilder.IntegrationTests
+dotnet new xunit -n MetaQuery.IntegrationTests
 dotnet add package Testcontainers.Oracle
 dotnet add package Microsoft.AspNetCore.Mvc.Testing
 ```
@@ -215,7 +215,7 @@ O projeto está **funcional e pronto para uso** com:
 docker-compose up -d
 
 # 2. Rodar API
-dotnet run --project src/QueryBuilder.Api
+dotnet run --project src/MetaQuery.Api
 
 # 3. Acessar Swagger
 # http://localhost:5249/swagger

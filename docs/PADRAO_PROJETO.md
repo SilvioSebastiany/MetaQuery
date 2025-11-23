@@ -16,7 +16,7 @@ Este documento descreve a arquitetura, padrões e boas práticas observados no p
 - [Padrões de Design](#-padrões-de-design)
 - [Princípios SOLID](#-princípios-solid)
 - [Segurança](#-segurança)
-- [Comparação com QueryBuilder MVP](#-comparação-com-querybuilder-mvp)
+- [Comparação com MetaQuery](#-comparação-com-querybuilder-mvp)
 
 ---
 
@@ -1088,9 +1088,9 @@ public class EstoqueExternalService : IEstoqueExternalService
 
 ---
 
-## 🎯 Comparação com QueryBuilder MVP
+## 🎯 Comparação com MetaQuery
 
-| Aspecto | Projeto Herval | QueryBuilder MVP |
+| Aspecto | Projeto Herval | MetaQuery |
 |---------|----------------|------------------|
 | **CQRS** | ⚠️ Pragmático (Commands com MediatR) | ✅ Completo (Queries + Commands) |
 | **Queries** | ❌ Repositório direto | ✅ Query + QueryHandler + MediatR |
@@ -1131,11 +1131,11 @@ public class EstoqueExternalService : IEstoqueExternalService
 
 ---
 
-## 🎯 Decisão: Por Que QueryBuilder MVP Usa CQRS Completo?
+## 🎯 Decisão: Por Que MetaQuery Usa CQRS Completo?
 
 ### Justificativa da Diferença
 
-Embora o projeto Herval use **CQRS Pragmático**, o QueryBuilder MVP optou por **CQRS Completo** pelos seguintes motivos:
+Embora o projeto Herval use **CQRS Pragmático**, o MetaQuery optou por **CQRS Completo** pelos seguintes motivos:
 
 #### 1. **Consistência Arquitetural**
 - ✅ Um único padrão para tudo (READ + WRITE)
@@ -1172,7 +1172,7 @@ Embora o projeto Herval use **CQRS Pragmático**, o QueryBuilder MVP optou por *
 - ✅ Prazo apertado
 - ✅ Projeto pequeno/médio
 
-**Use CQRS Completo (QueryBuilder MVP) quando:**
+**Use CQRS Completo (MetaQuery) quando:**
 - ✅ Time experiente ou em aprendizado estruturado
 - ✅ Queries complexas com validações
 - ✅ Precisa de cross-cutting concerns em READ
@@ -1197,7 +1197,7 @@ Embora o projeto Herval use **CQRS Pragmático**, o QueryBuilder MVP optou por *
 
 O padrão arquitetural da Herval é **robusto, pragmático e testado em produção** em ambiente corporativo de larga escala. Serve como excelente referência para projetos .NET enterprise.
 
-A principal diferença do QueryBuilder MVP (CQRS Completo vs Pragmático) é uma **decisão consciente baseada em objetivos de aprendizado e sustentabilidade de longo prazo**, não uma falha ou desconhecimento do padrão Herval.
+A principal diferença do MetaQuery (CQRS Completo vs Pragmático) é uma **decisão consciente baseada em objetivos de aprendizado e sustentabilidade de longo prazo**, não uma falha ou desconhecimento do padrão Herval.
 
 Ambas as abordagens são válidas e devem ser escolhidas baseadas no **contexto do projeto, time e objetivos**.
 

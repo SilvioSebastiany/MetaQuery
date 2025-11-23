@@ -1,4 +1,4 @@
-# 📐 Decisões Arquiteturais - QueryBuilder MVP
+# 📐 Decisões Arquiteturais - MetaQuery
 
 ## 📅 Data: Novembro 19, 2025
 
@@ -6,7 +6,7 @@
 
 ## 🎯 Contexto e Motivação
 
-Este documento registra as decisões arquiteturais tomadas durante o desenvolvimento do projeto QueryBuilder MVP, com foco especial na implementação do padrão CQRS + MediatR e DomainServices.
+Este documento registra as decisões arquiteturais tomadas durante o desenvolvimento do projeto MetaQuery, com foco especial na implementação do padrão CQRS + MediatR e DomainServices.
 
 **Contexto Corporativo:**
 - Empresa: Herval
@@ -24,7 +24,7 @@ Este documento registra as decisões arquiteturais tomadas durante o desenvolvim
 ### 📋 Estrutura Adotada
 
 ```
-src/QueryBuilder.Domain/
+src/MetaQuery.Domain/
 ├── Queries/                              ✅ CQRS Read (via MediatR)
 │   ├── ConsultaDinamicaQuery.cs
 │   └── Handlers/
@@ -285,7 +285,7 @@ public class QueryBuilderService : IQueryBuilderService
 7. ConsultaDinamicaDomainService (Lógica de Negócio)
    ├─ ValidarTabelaPermitida("CLIENTES") ✅
    ├─ ValidarProfundidade(2) ✅
-   ├─ Chama: _queryBuilder.MontarQuery(...)
+   ├─ Chama: _MetaQuery.MontarQuery(...)
    ├─ Chama: _repository.ExecutarQueryAsync(...)
    ├─ ValidarLimiteRegistros(150) ✅
    └─ Retorna: ConsultaDinamicaResult

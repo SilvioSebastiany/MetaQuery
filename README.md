@@ -1,4 +1,4 @@
-# 🚀 QueryBuilder MVP - Sistema de Consultas Dinâmicas
+# 🚀 MetaQuery - Sistema de Consultas Dinâmicas
 
 > **Sistema inteligente de consultas dinâmicas ao banco de dados Oracle com geração automática de queries baseada em metadados**
 
@@ -28,7 +28,7 @@
 
 ## 🎯 Sobre o Projeto
 
-O **QueryBuilder MVP** é um sistema que revoluciona a forma de consultar bancos de dados, eliminando a necessidade de escrever SQL repetitivo. Através de uma **tabela de metadados** (`TABELA_DINAMICA`), o sistema aprende sobre a estrutura do banco e **gera queries automaticamente**, incluindo JOINs complexos e relacionamentos entre tabelas.
+O **MetaQuery** é um sistema que revoluciona a forma de consultar bancos de dados, eliminando a necessidade de escrever SQL repetitivo. Através de uma **tabela de metadados** (`TABELA_DINAMICA`), o sistema aprende sobre a estrutura do banco e **gera queries automaticamente**, incluindo JOINs complexos e relacionamentos entre tabelas.
 
 ### 💡 O Problema Resolvido
 
@@ -49,8 +49,8 @@ var query2 = new Query("PRODUTOS")
 **Depois:**
 ```csharp
 // Uma única linha para qualquer tabela! 🎉
-var query = queryBuilder.MontarQuery("PEDIDOS", incluirJoins: true);
-var query2 = queryBuilder.MontarQuery("PRODUTOS", incluirJoins: true);
+var query = MetaQuery.MontarQuery("PEDIDOS", incluirJoins: true);
+var query2 = MetaQuery.MontarQuery("PRODUTOS", incluirJoins: true);
 ```
 
 ### 🌟 Características Principais
@@ -204,13 +204,13 @@ O projeto segue **Clean Architecture** (Arquitetura Limpa) com separação clara
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    Presentation Layer                        │
-│              (QueryBuilder.Api)                             │
+│              (MetaQuery.Api)                             │
 │         Controllers │ DTOs │ Swagger                        │
 └───────────────────────┬─────────────────────────────────────┘
                         │ Depende ↓
 ┌─────────────────────────────────────────────────────────────┐
 │                    Application Layer                         │
-│              (QueryBuilder.Domain)                          │
+│              (MetaQuery.Domain)                          │
 │    Entities │ ValueObjects │ Interfaces │ Commands          │
 └───────────────────────┬─────────────────────────────────────┘
                         │ Implementado por ↓
@@ -235,9 +235,9 @@ O projeto segue **Clean Architecture** (Arquitetura Limpa) com separação clara
 ### 📂 Estrutura de Diretórios
 
 ```
-QueryBuilderMVP/
+MetaQuery/
 ├── src/
-│   ├── QueryBuilder.Api/                    # 🌐 Camada de Apresentação
+│   ├── MetaQuery.Api/                    # 🌐 Camada de Apresentação
 │   │   ├── Controllers/
 │   │   │   └── MetadadosController.cs      # Endpoints REST
 │   │   ├── Responses/                      # DTOs de resposta
@@ -245,7 +245,7 @@ QueryBuilderMVP/
 │   │   ├── appsettings.json               # Configurações
 │   │   └── Dockerfile                     # Build da API
 │   │
-│   ├── QueryBuilder.Domain/                 # 🎯 Camada de Domínio
+│   ├── MetaQuery.Domain/                 # 🎯 Camada de Domínio
 │   │   ├── Entities/
 │   │   │   └── TabelaDinamica.cs          # Agregado raiz
 │   │   ├── ValueObjects/
@@ -255,20 +255,20 @@ QueryBuilderMVP/
 │   │   ├── Services/                      # Lógica de domínio
 │   │   └── Commands/                      # CQRS Commands
 │   │
-│   ├── QueryBuilder.Infra.Data/             # 💾 Acesso a Dados
+│   ├── MetaQuery.Infra.Data/             # 💾 Acesso a Dados
 │   │   ├── Repositories/
 │   │   │   └── MetadadosRepository.cs     # Dapper + Oracle
 │   │   └── Context/                       # DbContext
 │   │
-│   ├── QueryBuilder.Infra.Externals/        # 🔌 Serviços Externos
+│   ├── MetaQuery.Infra.Externals/        # 🔌 Serviços Externos
 │   │   └── Services/                      # APIs externas
 │   │
-│   ├── QueryBuilder.Infra.CrossCutting/     # 🛠️ Recursos Compartilhados
+│   ├── MetaQuery.Infra.CrossCutting/     # 🛠️ Recursos Compartilhados
 │   │   ├── Settings/
 │   │   │   └── DatabaseSettings.cs        # Configurações
 │   │   └── Extensions/                    # Extension methods
 │   │
-│   └── QueryBuilder.Infra.CrossCutting.IoC/ # 💉 Injeção de Dependência
+│   └── MetaQuery.Infra.CrossCutting.IoC/ # 💉 Injeção de Dependência
 │       └── DependencyInjection.cs         # Container de DI
 │
 ├── scripts/                                 # 📜 Scripts SQL
@@ -285,7 +285,7 @@ QueryBuilderMVP/
 ├── docker-compose.yaml                      # 🐳 Orquestração Docker
 ├── debug-manager.ps1                        # 🔧 Gerenciamento de debug
 ├── api-tests.http                          # 🧪 Testes da API
-├── QueryBuilder.Solution.sln               # 📦 Solution .NET
+├── MetaQuery.Solution.sln               # 📦 Solution .NET
 └── README.md                               # 📖 Este arquivo
 ```
 
@@ -340,8 +340,8 @@ Certifique-se de ter instalado:
 ### Passo 1: Clonar o Repositório
 
 ```powershell
-git clone https://github.com/SilvioSebastiany/QueryBuilderMVP.git
-cd QueryBuilderMVP
+git clone https://github.com/SilvioSebastiany/MetaQuery.git
+cd MetaQuery
 ```
 
 ### Passo 2: Iniciar Ambiente Docker
@@ -377,7 +377,7 @@ Pressione F5
 
 **Opção B: Via Terminal**
 ```powershell
-dotnet run --project src/QueryBuilder.Api/QueryBuilder.Api.csproj
+dotnet run --project src/MetaQuery.Api/MetaQuery.Api.csproj
 ```
 
 **Opção C: Via Docker**
@@ -861,11 +861,11 @@ Build failed
 
 ```powershell
 # Restaurar dependências
-dotnet restore QueryBuilder.Solution.sln
+dotnet restore MetaQuery.Solution.sln
 
 # Limpar e rebuild
-dotnet clean QueryBuilder.Solution.sln
-dotnet build QueryBuilder.Solution.sln
+dotnet clean MetaQuery.Solution.sln
+dotnet build MetaQuery.Solution.sln
 
 # Verificar versão do .NET
 dotnet --version
@@ -989,7 +989,7 @@ O SqlKata original também é MIT - veja [SqlKata GitHub](https://github.com/sql
 
 Encontrou algum problema? Tem alguma sugestão?
 
-1. **Issues**: Abra uma [issue no GitHub](https://github.com/SilvioSebastiany/QueryBuilderMVP/issues)
+1. **Issues**: Abra uma [issue no GitHub](https://github.com/SilvioSebastiany/MetaQuery/issues)
 2. **Documentação**: Consulte a pasta `docs/`
 3. **Logs**: Verifique `docker logs` para diagnóstico
 
@@ -997,7 +997,7 @@ Encontrou algum problema? Tem alguma sugestão?
 
 <div align="center">
 
-**🎉 QueryBuilder MVP - Menos SQL manual, mais produtividade! 🚀**
+**🎉 MetaQuery - Menos SQL manual, mais produtividade! 🚀**
 
 Feito com ❤️ usando .NET, SqlKata, Dapper e Oracle Database
 

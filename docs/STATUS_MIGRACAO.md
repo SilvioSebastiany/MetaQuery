@@ -3,14 +3,14 @@
 ## ✅ Concluído até agora:
 
 ### 1. Estrutura de Solution
-- ✅ Criada solution `QueryBuilder.Solution.sln`
+- ✅ Criada solution `MetaQuery.Solution.sln`
 - ✅ 6 projetos criados e adicionados à solution:
-  - `QueryBuilder.Api` (Web API)
-  - `QueryBuilder.Domain` (Regras de negócio)
-  - `QueryBuilder.Infra.Data` (Acesso a dados)
-  - `QueryBuilder.Infra.Externals` (APIs externas)
-  - `QueryBuilder.Infra.CrossCutting` (Recursos compartilhados)
-  - `QueryBuilder.Infra.CrossCutting.IoC` (Injeção de dependência)
+  - `MetaQuery.Api` (Web API)
+  - `MetaQuery.Domain` (Regras de negócio)
+  - `MetaQuery.Infra.Data` (Acesso a dados)
+  - `MetaQuery.Infra.Externals` (APIs externas)
+  - `MetaQuery.Infra.CrossCutting` (Recursos compartilhados)
+  - `MetaQuery.Infra.CrossCutting.IoC` (Injeção de dependência)
 
 ### 2. Referências entre Projetos
 ```
@@ -43,18 +43,18 @@ IoC → Domain, Infra.Data, Infra.Externals, CrossCutting
 ### 4. Estrutura de Pastas
 ```
 src/
-├── QueryBuilder.Domain/
+├── MetaQuery.Domain/
 │   ├── Entities/         ✅
 │   ├── ValueObjects/     ✅
 │   ├── Services/         📁 (criada, vazia)
 │   ├── Interfaces/       ✅
 │   └── Commands/         📁 (criada, vazia)
 │       └── Handlers/     📁 (criada, vazia)
-├── QueryBuilder.Api/     📁 (criada, padrão)
-├── QueryBuilder.Infra.Data/     📁 (criada, vazia)
-├── QueryBuilder.Infra.Externals/     📁 (criada, vazia)
-├── QueryBuilder.Infra.CrossCutting/  📁 (criada, vazia)
-└── QueryBuilder.Infra.CrossCutting.IoC/  📁 (criada, vazia)
+├── MetaQuery.Api/     📁 (criada, padrão)
+├── MetaQuery.Infra.Data/     📁 (criada, vazia)
+├── MetaQuery.Infra.Externals/     📁 (criada, vazia)
+├── MetaQuery.Infra.CrossCutting/  📁 (criada, vazia)
+└── MetaQuery.Infra.CrossCutting.IoC/  📁 (criada, vazia)
 ```
 
 ---
@@ -130,7 +130,7 @@ src/
 - [ ] Unit tests
 ### ✅ Estrutura CQRS Criada:
 ```
-QueryBuilder.Domain/
+MetaQuery.Domain/
 ├── Queries/
 │   ├── ConsultaDinamicaQuery.cs ✅
 │   └── Handlers/
@@ -263,10 +263,10 @@ Domain/
 ```
 
 ### Arquivos Criados/Modificados:
-- `src/QueryBuilder.Domain/DomainServices/ConsultaDinamicaDomainService.cs` ✅
-- `src/QueryBuilder.Domain/DomainServices/MetadadosDomainService.cs` ✅
-- `src/QueryBuilder.Domain/Queries/Handlers/ConsultaDinamicaQueryHandler.cs` ✅ (refatorado)
-- `src/QueryBuilder.Infra.CrossCutting.IoC/DependencyInjection.cs` ✅ (DomainServices registrados)
+- `src/MetaQuery.Domain/DomainServices/ConsultaDinamicaDomainService.cs` ✅
+- `src/MetaQuery.Domain/DomainServices/MetadadosDomainService.cs` ✅
+- `src/MetaQuery.Domain/Queries/Handlers/ConsultaDinamicaQueryHandler.cs` ✅ (refatorado)
+- `src/MetaQuery.Infra.CrossCutting.IoC/DependencyInjection.cs` ✅ (DomainServices registrados)
 - `docs/DECISOES_ARQUITETURAIS.md` ✅ (novo, 400+ linhas de documentação)
 
 ### Backup Criado:
@@ -284,7 +284,7 @@ Domain/
 docker ps | grep oracle
 
 # 2. Executar API
-dotnet run --project src/QueryBuilder.Api
+dotnet run --project src/MetaQuery.Api
 
 # 3. Testar endpoint
 curl http://localhost:5249/api/ConsultaDinamica/CLIENTES?incluirJoins=true&profundidade=2

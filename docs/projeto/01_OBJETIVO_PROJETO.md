@@ -2,7 +2,7 @@
 
 ## 📌 Visão Geral
 
-O **QueryBuilder MVP** é um sistema de consultas dinâmicas ao banco de dados Oracle que elimina a necessidade de escrever SQL repetitivo através de uma abordagem baseada em metadados.
+O **MetaQuery** é um sistema de consultas dinâmicas ao banco de dados Oracle que elimina a necessidade de escrever SQL repetitivo através de uma abordagem baseada em metadados.
 
 ---
 
@@ -40,8 +40,8 @@ Um sistema que **aprende** sobre a estrutura do banco através de metadados e **
 
 ```csharp
 // Uma única linha para qualquer tabela! 🎉
-var query = queryBuilder.MontarQuery("CLIENTES", incluirJoins: true);
-var query2 = queryBuilder.MontarQuery("PRODUTOS", incluirJoins: true);
+var query = MetaQuery.MontarQuery("CLIENTES", incluirJoins: true);
+var query2 = MetaQuery.MontarQuery("PRODUTOS", incluirJoins: true);
 ```
 
 ---
@@ -118,7 +118,7 @@ public async Task<IActionResult> Get(
     string tabela,
     [FromQuery] bool incluirRelacionamentos = false)
 {
-    var query = queryBuilder.MontarQuery(tabela, incluirRelacionamentos);
+    var query = MetaQuery.MontarQuery(tabela, incluirRelacionamentos);
     var dados = await ExecutarQuery(query);
     return Ok(dados);
 }
@@ -142,7 +142,7 @@ var relatorio = await gerarRelatorio(
 // Cada cliente pode ter estrutura de banco diferente
 // Sistema se adapta automaticamente aos metadados de cada tenant
 var metadados = await repository.ObterPorTenant(tenantId);
-var query = queryBuilder.MontarQuery("CLIENTES", metadados);
+var query = MetaQuery.MontarQuery("CLIENTES", metadados);
 ```
 
 ### 4. Integrações Externas
@@ -280,7 +280,7 @@ Este projeto foi inspirado por:
 
 ## 📝 Conclusão
 
-O QueryBuilder MVP é mais do que apenas código - é uma **jornada de aprendizado documentada**, resolvendo um **problema real** usando **arquitetura moderna** e **boas práticas**.
+O MetaQuery é mais do que apenas código - é uma **jornada de aprendizado documentada**, resolvendo um **problema real** usando **arquitetura moderna** e **boas práticas**.
 
 O objetivo não é apenas ter um sistema funcionando, mas **dominar as tecnologias** e **entender profundamente** como construir software de qualidade.
 
