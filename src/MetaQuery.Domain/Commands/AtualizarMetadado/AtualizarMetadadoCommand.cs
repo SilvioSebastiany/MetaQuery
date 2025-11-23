@@ -1,6 +1,6 @@
 using MediatR;
 
-namespace MetaQuery.Domain.Commands.Metadados
+namespace MetaQuery.Domain.Commands.AtualizarMetadado
 {
     /// <summary>
     /// Command para atualizar um metadado existente

@@ -1,10 +1,10 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
-using MetaQuery.Domain.Commands.Metadados;
+using MetaQuery.Domain.Commands.AtualizarMetadado;
 using MetaQuery.Domain.Interfaces;
 using MetaQuery.Domain.Notifications;
 
-namespace MetaQuery.Domain.Commands.Handlers
+namespace MetaQuery.Domain.Commands.AtualizarMetadado
 {
     /// <summary>
     /// Handler para atualização de metadados de tabela dinâmica

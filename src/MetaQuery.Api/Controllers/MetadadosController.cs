@@ -1,6 +1,8 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using MetaQuery.Domain.Commands.Metadados;
+using MetaQuery.Domain.Commands.CriarMetadado;
+using MetaQuery.Domain.Commands.AtualizarMetadado;
+using MetaQuery.Domain.Commands.DesativarMetadado;
 using MetaQuery.Domain.Queries.Metadados;
 
 namespace MetaQuery.Api.Controllers

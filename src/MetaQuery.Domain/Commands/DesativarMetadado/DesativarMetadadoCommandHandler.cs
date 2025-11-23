@@ -1,10 +1,10 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
-using MetaQuery.Domain.Commands.Metadados;
+using MetaQuery.Domain.Commands.DesativarMetadado;
 using MetaQuery.Domain.Interfaces;
 using MetaQuery.Domain.Notifications;
 
-namespace MetaQuery.Domain.Commands.Handlers
+namespace MetaQuery.Domain.Commands.DesativarMetadado
 {
     /// <summary>
     /// Handler para desativação (soft delete) de metadados

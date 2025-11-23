@@ -1,6 +1,6 @@
 using MediatR;
 
-namespace MetaQuery.Domain.Commands.Metadados
+namespace MetaQuery.Domain.Commands.DesativarMetadado
 {
     /// <summary>
     /// Command para desativar (soft delete) um metadado

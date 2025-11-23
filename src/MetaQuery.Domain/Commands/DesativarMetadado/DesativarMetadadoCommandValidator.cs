@@ -1,18 +1,17 @@
 using FluentValidation;
-using MetaQuery.Domain.Commands.Metadados;
 
-namespace MetaQuery.Domain.Validators
+namespace MetaQuery.Domain.Commands.DesativarMetadado
 {
     /// <summary>
-    /// Validador para DesativarMetadadoCommand usando FluentValidation
+    /// Validator para DesativarMetadadoCommand
     /// </summary>
     public class DesativarMetadadoCommandValidator : AbstractValidator<DesativarMetadadoCommand>
     {
         public DesativarMetadadoCommandValidator()
         {
-            // Validação do ID
             RuleFor(x => x.Id)
-                .GreaterThan(0).WithMessage("ID do metadado deve ser maior que zero");
+                .GreaterThan(0)
+                .WithMessage("O ID do metadado deve ser maior que zero");
         }
     }
 }

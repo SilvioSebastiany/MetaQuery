@@ -1,8 +1,7 @@
 using Moq;
 using Xunit;
 using FluentAssertions;
-using MetaQuery.Domain.Commands.Handlers;
-using MetaQuery.Domain.Commands.Metadados;
+using MetaQuery.Domain.Commands.CriarMetadado;
 using MetaQuery.Domain.Interfaces;
 using MetaQuery.Infra.Data.Repositories;
 using MetaQuery.Domain.Notifications;

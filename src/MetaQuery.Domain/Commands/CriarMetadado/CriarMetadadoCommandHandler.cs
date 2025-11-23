@@ -1,11 +1,11 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
-using MetaQuery.Domain.Commands.Metadados;
+using MetaQuery.Domain.Commands.CriarMetadado;
 using MetaQuery.Domain.Entities;
 using MetaQuery.Domain.Interfaces;
 using MetaQuery.Domain.Notifications;
 
-namespace MetaQuery.Domain.Commands.Handlers
+namespace MetaQuery.Domain.Commands.CriarMetadado
 {
     /// <summary>
     /// Handler para criação de metadados de tabela dinâmica

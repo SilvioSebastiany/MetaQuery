@@ -1,6 +1,6 @@
 using MediatR;
 
-namespace MetaQuery.Domain.Commands.Metadados
+namespace MetaQuery.Domain.Commands.CriarMetadado
 {
     /// <summary>
     /// Command para criar um novo metadado de tabela dinâmica
