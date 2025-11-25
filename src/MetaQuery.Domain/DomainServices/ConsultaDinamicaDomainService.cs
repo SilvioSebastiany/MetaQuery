@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Logging;
 using MetaQuery.Domain.Interfaces;
 using MetaQuery.Domain.Notifications;
-using MetaQuery.Domain.Queries;
 
 namespace MetaQuery.Domain.DomainServices;
 
@@ -27,32 +26,23 @@ public class ConsultaDinamicaDomainService
     /// <summary>
     /// Executa consulta dinâmica em uma tabela com lógica de negócio aplicada
     /// </summary>
-    public async Task<ConsultaDinamicaResult> ConsultarTabelaAsync(
-        string tabela,
-        bool incluirJoins,
-        int profundidade)
+    public async Task<ConsultaDinamicaResult> ConsultarTabelaAsync(string tabela, bool incluirJoins, int profundidade)
     {
         _logger.LogInformation(
             "Consultando tabela {Tabela} com joins={IncluirJoins}, profundidade={Profundidade}",
             tabela, incluirJoins, profundidade);
 
         // 1. Montar query SQL usando QueryBuilderService
-        var sqlQuery = _queryBuilderService.MontarQuery(
-            tabela,
-            incluirJoins,
-            profundidade);
+        var sqlQuery = _queryBuilderService.MontarQuery(tabela, incluirJoins, profundidade);
 
         // 2. Compilar query para obter SQL gerado
         var compiledQuery = _queryBuilderService.CompilarQuery(sqlQuery);
         _logger.LogDebug("SQL gerado: {Sql}", compiledQuery.Sql);
 
-        // 3. Executar query no banco de dados
         var dados = await _consultaDinamicaRepository.ExecutarQueryAsync(sqlQuery);
 
-        // 4. Aplicar regras de negócio
         var totalRegistros = dados.Count();
-        
-        // Regra de negócio: Alertar se resultado muito grande
+
         if (totalRegistros > 5000)
         {
             _logger.LogWarning(
@@ -61,12 +51,7 @@ public class ConsultaDinamicaDomainService
         }
 
         // 5. Retornar resultado estruturado
-        return new ConsultaDinamicaResult(
-            Tabela: tabela,
-            TotalRegistros: totalRegistros,
-            Dados: dados,
-            SqlGerado: compiledQuery.Sql
-        );
+        return new ConsultaDinamicaResult(tabela, totalRegistros, dados, compiledQuery.Sql);
     }
 
     /// <summary>

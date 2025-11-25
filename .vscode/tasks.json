@@ -33,7 +33,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/QueryBuilder/QueryBuilder.csproj"
+                "${workspaceFolder}/MetaQuery/MetaQuery.csproj"
             ],
             "problemMatcher": "$msCompile"
         },
@@ -53,7 +53,7 @@
             "type": "process",
             "args": [
                 "test",
-                "${workspaceFolder}/QueryBuilder.Tests/QueryBuilder.Tests.csproj"
+                "${workspaceFolder}/MetaQuery.Tests/MetaQuery.Tests.csproj"
             ],
             "problemMatcher": "$msCompile",
             "group": {
@@ -77,7 +77,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/src/QueryBuilder.Api/QueryBuilder.Api.csproj",
+                "${workspaceFolder}/src/MetaQuery.Api/MetaQuery.Api.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -90,7 +90,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/QueryBuilder.Solution.sln",
+                "${workspaceFolder}/MetaQuery.Solution.sln",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -105,7 +105,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/src/QueryBuilder.Api/QueryBuilder.Api.csproj"
+                "${workspaceFolder}/src/MetaQuery.Api/MetaQuery.Api.csproj"
             ],
             "problemMatcher": "$msCompile",
             "isBackground": true,
@@ -117,7 +117,7 @@
             "type": "process",
             "args": [
                 "clean",
-                "${workspaceFolder}/src/QueryBuilder.Api/QueryBuilder.Api.csproj"
+                "${workspaceFolder}/src/MetaQuery.Api/MetaQuery.Api.csproj"
             ],
             "problemMatcher": "$msCompile"
         },
@@ -285,3 +285,4 @@
         }
     ]
 }
+

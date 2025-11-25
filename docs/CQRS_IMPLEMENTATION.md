@@ -1,40 +1,55 @@
 # 🎯 Implementação CQRS + MediatR - MetaQuery
 
-## 📅 Data: Novembro 18, 2025
+## 📅 Atualizado: Novembro 24, 2025
 
 ---
 
 ## 🎉 Objetivo
 
-Migrar projeto de injeção direta de dependências (Repository + Service) para **padrão CQRS + MediatR**, alinhando com os padrões corporativos da empresa Herval.
+Migrar projeto para **padrão CQRS + MediatR**, alinhando 100% com os padrões corporativos da empresa Herval:
+- **Commands** (escrita) = MediatR + Pipeline (Validation, Logging)
+- **Queries** (leitura) = Repositório/DomainService direto (SEM MediatR)
 
 ---
 
 ## 🏗️ Arquitetura Implementada
 
-### Antes (Injeção Direta):
+### Padrão Herval (CQRS Pragmático)
+
+#### ✅ WRITE Operations (Commands)
 ```
-Controller → IQueryBuilderService → IConsultaDinamicaRepository → Database
-                ↓
-        Try/Catch manual
-        Validações no Controller
-        Logs manuais
+HTTP POST/PUT/DELETE
+    ↓
+Controller
+    ↓
+IMediator.Send(Command)
+    ↓
+ValidationBehavior (FluentValidation)
+    ↓
+LoggingBehavior (timing + logs)
+    ↓
+CommandHandler
+    ↓
+DomainService (regras de negócio)
+    ↓
+Repository
+    ↓
+Database
 ```
 
-### Depois (CQRS + MediatR):
+#### ✅ READ Operations (Queries - SEM MediatR)
 ```
-Controller → IMediator.Send(Query)
-                ↓
-        LoggingBehavior (timing + logs automáticos)
-                ↓
-        ValidationBehavior (FluentValidation automático)
-                ↓
-        ConsultaDinamicaQueryHandler
-                ↓
-        IQueryBuilderService → IConsultaDinamicaRepository → Database
-                ↓
-        NotificationContext (erros sem exceptions)
+HTTP GET
+    ↓
+Controller
+    ↓
+Repository.ObterAsync() ou DomainService.Method()
+    ↓
+Database
 ```
+
+**Justificativa:**
+Queries simples não precisam do overhead do MediatR. Repository direto é mais performático e mais fácil de entender.
 
 ---
 
@@ -50,259 +65,246 @@ Controller → IMediator.Send(Query)
 <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.1.0" />
 ```
 
-**Observação:** MediatR 13.1.0 foi instalado explicitamente no projeto IoC para resolver conflito de versão com MediatR.Extensions 11.1.0 (warning NU1608 esperado, não bloqueia funcionalidade).
-
 ---
 
-## 📁 Estrutura de Arquivos Criada
+## 📁 Estrutura Final do Projeto
 
 ```
 MetaQuery.Domain/
-├── Queries/                              ← NOVA
-│   ├── ConsultaDinamicaQuery.cs         ✅ Record com IRequest<TResponse>
-│   └── Handlers/
-│       └── ConsultaDinamicaQueryHandler.cs  ✅ IRequestHandler implementado
+├── Commands/                             ← Feature Folders (Padrão Herval)
+│   ├── CriarMetadado/
+│   │   ├── CriarMetadadoCommand.cs      ✅ class com IRequest<T>
+│   │   ├── CriarMetadadoCommandHandler.cs  ✅ IRequestHandler
+│   │   └── CriarMetadadoCommandValidator.cs ✅ AbstractValidator
+│   ├── AtualizarMetadado/
+│   │   ├── AtualizarMetadadoCommand.cs
+│   │   ├── AtualizarMetadadoCommandHandler.cs
+│   │   └── AtualizarMetadadoCommandValidator.cs
+│   └── DesativarMetadado/
+│       ├── DesativarMetadadoCommand.cs
+│       ├── DesativarMetadadoCommandHandler.cs
+│       └── DesativarMetadadoCommandValidator.cs
 │
-├── Commands/                             ← NOVA (próxima fase)
-│   └── Handlers/
+├── Behaviors/                            ← MediatR Behaviors
+│   ├── LoggingBehavior.cs               ✅ IPipelineBehavior
+│   └── ValidationBehavior.cs            ✅ IPipelineBehavior
 │
-├── Notifications/                        ← NOVA
-│   ├── Notification.cs                  ✅ Record (Key, Message)
+├── Notifications/                        ← Notification Pattern
+│   ├── Notification.cs                  ✅ record (Key, Message)
 │   ├── INotificationContext.cs          ✅ Interface
-│   └── NotificationContext.cs           ✅ Implementação com List<Notification>
+│   ├── NotificationContext.cs           ✅ Implementação
+│   └── ConsultaDinamicaResult.cs        ✅ DTO
 │
-├── Behaviors/                            ← NOVA
-│   ├── LoggingBehavior.cs               ✅ IPipelineBehavior (timing + logs)
-│   └── ValidationBehavior.cs            ✅ IPipelineBehavior (FluentValidation)
+├── DomainServices/                       ← Lógica de Negócio
+│   ├── MetadadosDomainService.cs
+│   └── ConsultaDinamicaDomainService.cs
 │
-└── Validators/                           ← NOVA
-    └── ConsultaDinamicaQueryValidator.cs ✅ AbstractValidator<ConsultaDinamicaQuery>
+└── Interfaces/
+    └── Repositories/
+        ├── IMetadadosRepository.cs      ← Usado direto em GETs
+        └── IConsultaDinamicaRepository.cs
+```
+
+### ❌ O Que FOI REMOVIDO
+```
+❌ Queries/                              ← DELETADO (11 arquivos)
+    ├── ConsultaDinamicaQuery.cs
+    ├── Metadados/
+    │   ├── ObterTodosMetadadosQuery.cs
+    │   ├── ObterMetadadoPorIdQuery.cs
+    │   └── ObterMetadadoPorTabelaQuery.cs
+    └── Handlers/
+        ├── ConsultaDinamicaQueryHandler.cs
+        ├── ObterTodosMetadadosQueryHandler.cs
+        ├── ObterMetadadoPorIdQueryHandler.cs
+        └── ObterMetadadoPorTabelaQueryHandler.cs
+
+❌ Validators/                           ← Query validators removidos
+    ├── ConsultaDinamicaQueryValidator.cs
+    ├── ObterMetadadoPorIdQueryValidator.cs
+    └──ObterMetadadoPorTabelaQueryValidator.cs
 ```
 
 ---
 
 ## 🔧 Componentes Implementados
 
-### 1. **Notification Pattern**
-
-**Objetivo:** Substituir exceptions por notificações para erros de validação.
+### 1. **Commands (Feature Folders)**
 
 ```csharp
-// Notification.cs
-public record Notification(string Key, string Message);
+// CriarMetadadoCommand.cs
+namespace MetaQuery.Domain.Commands.CriarMetadado;
 
-// INotificationContext.cs
-public interface INotificationContext
+public record CriarMetadadoCommand : IRequest<int>
 {
-    void AddNotification(string key, string message);
-    void AddNotifications(IEnumerable<Notification> notifications);
-    bool HasNotifications { get; }
-    IReadOnlyCollection<Notification> Notifications { get; }
-    void Clear();
+    public string Tabela { get; init; } = string.Empty;
+    public string CamposDisponiveis { get; init; } = string.Empty;
+    public string ChavePk { get; init; } = string.Empty;
+    public string? VinculoEntreTabela { get; init; }
+    public string? DescricaoTabela { get; init; }
+    public bool VisivelParaIA { get; init; } = true;
 }
 
-// NotificationContext.cs
-public class NotificationContext : INotificationContext
+// CriarMetadadoCommandHandler.cs
+public class CriarMetadadoCommandHandler : IRequestHandler<CriarMetadadoCommand, int>
 {
-    private readonly List<Notification> _notifications = new();
-    // Implementação...
-}
-```
-
-**Lifetime:** `Scoped` (uma instância por request HTTP)
-
----
-
-### 2. **Query CQRS**
-
-**Objetivo:** Representar uma intenção de leitura de dados.
-
-```csharp
-// ConsultaDinamicaQuery.cs
-public record ConsultaDinamicaQuery(
-    string Tabela,
-    bool IncluirJoins = false,
-    int Profundidade = 1
-) : IRequest<ConsultaDinamicaResult?>;
-
-public record ConsultaDinamicaResult(
-    string Tabela,
-    int TotalRegistros,
-    IEnumerable<dynamic> Dados,
-    string SqlGerado
-);
-```
-
-**Características:**
-- Imutável (record)
-- Implementa `IRequest<TResponse>` do MediatR
-- Valores default para parâmetros opcionais
-- Result object separado para resposta
-
----
-
-### 3. **Handler**
-
-**Objetivo:** Executar a lógica de negócio para a Query.
-
-```csharp
-// ConsultaDinamicaQueryHandler.cs
-public class ConsultaDinamicaQueryHandler
-    : IRequestHandler<ConsultaDinamicaQuery, ConsultaDinamicaResult?>
-{
-    private readonly IQueryBuilderService _queryBuilder;
-    private readonly IConsultaDinamicaRepository _repository;
+    private readonly IMetadadosDomainService _domainService;
     private readonly INotificationContext _notificationContext;
-    private readonly ILogger<ConsultaDinamicaQueryHandler> _logger;
 
-    public async Task<ConsultaDinamicaResult?> Handle(
-        ConsultaDinamicaQuery request,
-        CancellationToken cancellationToken)
+    public async Task<int> Handle(CriarMetadadoCommand request, CancellationToken ct)
     {
-        try
-        {
-            // 1. Montar query SQL
-            var sqlQuery = _MetaQuery.MontarQuery(
-                request.Tabela,
-                request.IncluirJoins,
-                request.Profundidade
-            );
-
-            // 2. Executar no banco
-            var dados = await _repository.ExecutarConsultaAsync(sqlQuery);
-
-            // 3. Retornar resultado
-            return new ConsultaDinamicaResult(
-                Tabela: request.Tabela,
-                TotalRegistros: dados.Count(),
-                Dados: dados,
-                SqlGerado: sqlQuery.RawSql
-            );
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Erro ao executar consulta");
-            _notificationContext.AddNotification("Erro", ex.Message);
-            return null;
-        }
+        var id = await _domainService.CriarAsync(request);
+        return id;
     }
 }
-```
 
-**Responsabilidades:**
-- Chamar serviços de domínio
-- Executar repositório
-- Tratar erros e popular NotificationContext
-- Retornar resultado ou null
-
----
-
-### 4. **Validator (FluentValidation)**
-
-**Objetivo:** Validar automaticamente a Query antes do Handler.
-
-```csharp
-// ConsultaDinamicaQueryValidator.cs
-public class ConsultaDinamicaQueryValidator : AbstractValidator<ConsultaDinamicaQuery>
+// CriarMetadadoCommandValidator.cs
+public class CriarMetadadoCommandValidator : AbstractValidator<CriarMetadadoCommand>
 {
-    private static readonly HashSet<string> TabelasPermitidas = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "CLIENTES", "PEDIDOS", "PRODUTOS", "CATEGORIAS", "ITENS_PEDIDO", "ENDERECOS"
-    };
-
-    public ConsultaDinamicaQueryValidator()
+    public CriarMetadadoCommandValidator()
     {
         RuleFor(x => x.Tabela)
-            .NotEmpty().WithMessage("Tabela é obrigatória")
-            .Must(t => TabelasPermitidas.Contains(t))
-            .WithMessage("Tabela não está autorizada");
+            .NotEmpty().WithMessage("O nome da tabela é obrigatório")
+            .MaximumLength(100)
+            .Matches("^[A-Z][A-Z0-9_]*$");
 
-        RuleFor(x => x.Profundidade)
-            .InclusiveBetween(1, 3)
-            .WithMessage("Profundidade deve estar entre 1 e 3");
+        RuleFor(x => x.CamposDisponiveis)
+            .NotEmpty().WithMessage("Os campos disponíveis são obrigatórios");
     }
 }
 ```
 
 **Características:**
-- Whitelist de tabelas permitidas (segurança)
-- Range validation para profundidade
-- Mensagens customizadas
-- Executado automaticamente pelo `ValidationBehavior`
+- Tudo em uma pasta (Command + Handler + Validator)
+- FluentValidation executado automaticamente pelo ValidationBehavior
+- Retorna tipos simples (int, bool)
 
 ---
 
-### 5. **Pipeline Behaviors**
-
-#### LoggingBehavior
-
-**Objetivo:** Logs e timing automáticos para todas as operações.
+### 2. **Controllers - Padrão Herval 100%**
 
 ```csharp
-public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : IRequest<TResponse>
+[ApiController]
+[Route("api/[controller]")]
+public class MetadadosController : ControllerBase
 {
-    private readonly ILogger<LoggingBehavior<TRequest, TResponse>> _logger;
+    private readonly IMediator _mediator;                // ← Para Commands
+    private readonly IMetadadosRepository _repository;   // ← Para Queries
 
-    public async Task<TResponse> Handle(
-        TRequest request,
-        RequestHandlerDelegate<TResponse> next,
-        CancellationToken cancellationToken)
+    public MetadadosController(
+        IMediator mediator,
+        IMetadadosRepository repository)
     {
-        var requestName = typeof(TRequest).Name;
-        var stopwatch = Stopwatch.StartNew();
+        _mediator = mediator;
+        _repository = repository;
+    }
 
-        _logger.LogInformation("Iniciando {RequestName} - {@Request}", requestName, request);
+    // ============ QUERIES (Leitura) - DIRETO ============
 
-        try
-        {
-            var response = await next(); // Chama próximo behavior ou handler
-            stopwatch.Stop();
+    [HttpGet]
+    public async Task<IActionResult> ObterTodos([FromQuery] bool apenasAtivos = true)
+    {
+        var metadados = await _repository.ObterTodosAsync(apenasAtivos); // ✅ DIRETO
+        return Ok(new { Total = metadados.Count(), Metadados = metadados });
+    }
 
-            _logger.LogInformation(
-                "{RequestName} executado com sucesso em {ElapsedMs}ms",
-                requestName, stopwatch.ElapsedMilliseconds);
+    [HttpGet("{id}")]
+    public async Task<IActionResult> ObterPorId(int id)
+    {
+        var metadado = await _repository.ObterPorIdAsync(id); // ✅ DIRETO
+        return metadado == null ? NotFound() : Ok(metadado);
+    }
 
-            return response;
-        }
-        catch (Exception ex)
-        {
-            stopwatch.Stop();
-            _logger.LogError(ex, "Erro ao executar {RequestName} após {ElapsedMs}ms",
-                requestName, stopwatch.ElapsedMilliseconds);
-            throw;
-        }
+    [HttpGet("tabela/{nomeTabela}")]
+    public async Task<IActionResult> ObterPorTabela(string nomeTabela)
+    {
+        var metadado = await _repository.ObterPorNomeTabelaAsync(nomeTabela); // ✅ DIRETO
+        return metadado == null ? NotFound() : Ok(metadado);
+    }
+
+    // ============ COMMANDS (Escrita) - MEDIATR ============
+
+    [HttpPost]
+    public async Task<IActionResult> Criar([FromBody] CriarMetadadoCommand command)
+    {
+        var id = await _mediator.Send(command); // ✅ MEDIATR com pipeline
+        return id > 0
+            ? CreatedAtAction(nameof(ObterPorId), new { id }, new { id })
+            : BadRequest();
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Atualizar(int id, [FromBody] AtualizarMetadadoCommand command)
+    {
+        var commandComId = command with { Id = id };
+        var sucesso = await _mediator.Send(commandComId);
+        return sucesso ? Ok() : NotFound();
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Desativar(int id)
+    {
+        var sucesso = await _mediator.Send(new DesativarMetadadoCommand(id));
+        return sucesso ? Ok() : NotFound();
+    }
+}
+```
+
+```csharp
+[ApiController]
+[Route("api/[controller]")]
+public class ConsultaDinamicaController : ControllerBase
+{
+    private readonly ConsultaDinamicaDomainService _consultaService; // ← DomainService direto
+    private readonly IMetadadosRepository _metadadosRepository;
+
+    // ============ QUERIES (Leitura) - DIRETO ============
+
+    [HttpGet("{tabela}")]
+    public async Task<IActionResult> Consultar(
+        string tabela,
+        [FromQuery] bool incluirJoins = false,
+        [FromQuery] int profundidade = 2)
+    {
+        var resultado = await _consultaService.ConsultarTabelaAsync(
+            tabela, incluirJoins, profundidade); // ✅ DIRETO
+
+        return Ok(resultado);
+    }
+
+    [HttpGet("tabelas-disponiveis")]
+    public async Task<IActionResult> ListarTabelasDisponiveis()
+    {
+        var metadados = await _metadadosRepository.ObterTodosAsync(apenasAtivos: true);
+        var tabelas = metadados.Select(m => m.Tabela).OrderBy(t => t);
+        return Ok(new { Total = tabelas.Count(), Tabelas = tabelas });
     }
 }
 ```
 
 **Características:**
-- Genérico (`<TRequest, TResponse>`)
-- Wrapper com try/catch
-- Stopwatch para medição de performance
-- Logs estruturados (ILogger)
+- GETs = Repository/DomainService direto
+- POST/PUT/DELETE = MediatR com pipeline completo
+- Sem try/catch (tratado nos behaviors quando usando MediatR)
+- Simplicidade máxima para leituras
 
-#### ValidationBehavior
+---
 
-**Objetivo:** Executar FluentValidation automaticamente.
+### 3. **Pipeline Behaviors (Apenas para Commands)**
 
 ```csharp
+// ValidationBehavior.cs
 public class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>
 {
     private readonly IEnumerable<IValidator<TRequest>> _validators;
     private readonly INotificationContext _notificationContext;
 
-    public async Task<TResponse> Handle(
-        TRequest request,
-        RequestHandlerDelegate<TResponse> next,
-        CancellationToken cancellationToken)
+    public async Task<TResponse> Handle(...)
     {
-        // Se não tem validators, segue fluxo
         if (!_validators.Any())
             return await next();
 
-        // Executar todas as validações
         var context = new ValidationContext<TRequest>(request);
         var validationResults = await Task.WhenAll(
             _validators.Select(v => v.ValidateAsync(context, cancellationToken)));
@@ -312,7 +314,6 @@ public class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TReques
             .Where(f => f != null)
             .ToList();
 
-        // Se tem erros, adiciona nas notificações e retorna default
         if (failures.Any())
         {
             foreach (var failure in failures)
@@ -321,126 +322,92 @@ public class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TReques
                     failure.PropertyName,
                     failure.ErrorMessage);
             }
-            return default!; // Retorna null, não chama Handler
+            return default!; // Curto-circuita pipeline
         }
 
-        // Validação passou, prossegue para o handler
         return await next();
     }
 }
 ```
 
-**Características:**
-- Resolve todos `IValidator<TRequest>` do DI
-- Executa validações em paralelo (`Task.WhenAll`)
-- Popula NotificationContext em caso de erro
-- Curto-circuita pipeline (não chama Handler se validação falhar)
-
----
-
-### 6. **Controller Refatorado**
-
-**Antes:** 315 linhas, injeção direta de 3 dependências, try/catch manual
-
-**Depois:** 108 linhas, CQRS puro
-
 ```csharp
-[ApiController]
-[Route("api/[controller]")]
-public class ConsultaDinamicaController : ControllerBase
+// LoggingBehavior.cs
+public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+    where TRequest : IRequest<TResponse>
 {
-    private readonly IMediator _mediator;
-    private readonly INotificationContext _notificationContext;
-    private readonly ILogger<ConsultaDinamicaController> _logger;
+    private readonly ILogger<LoggingBehavior<TRequest, TResponse>> _logger;
 
-    public ConsultaDinamicaController(
-        IMediator mediator,
-        INotificationContext notificationContext,
-        ILogger<ConsultaDinamicaController> logger)
+    public async Task<TResponse> Handle(...)
     {
-        _mediator = mediator;
-        _notificationContext = notificationContext;
-        _logger = logger;
-    }
+        var requestName = typeof(TRequest).Name;
+        var stopwatch = Stopwatch.StartNew();
 
-    [HttpGet("{tabela}")]
-    public async Task<IActionResult> Consultar(
-        string tabela,
-        [FromQuery] bool incluirJoins = false,
-        [FromQuery] int profundidade = 2)
-    {
-        // Criar query
-        var query = new ConsultaDinamicaQuery(tabela, incluirJoins, profundidade);
+        _logger.LogInformation("Iniciando {RequestName}", requestName);
 
-        // Enviar para MediatR (pipeline executa automaticamente)
-        var resultado = await _mediator.Send(query);
-
-        // Se tem notificações (validações falharam), retorna 400
-        if (_notificationContext.HasNotifications)
+        try
         {
-            return BadRequest(new
-            {
-                Erros = _notificationContext.Notifications.Select(n => new
-                {
-                    Campo = n.Key,
-                    Mensagem = n.Message
-                })
-            });
+            var response = await next();
+            stopwatch.Stop();
+
+            _logger.LogInformation(
+                "{RequestName} executado em {ElapsedMs}ms",
+                requestName, stopwatch.ElapsedMilliseconds);
+
+            return response;
         }
-
-        // Se resultado é null (erro no handler), retorna 500
-        if (resultado == null)
-            return StatusCode(500, new { Erro = "Erro ao processar consulta" });
-
-        // Sucesso
-        return Ok(new
+        catch (Exception ex)
         {
-            Tabela = resultado.Tabela.ToUpper(),
-            IncluiJoins = incluirJoins,
-            Profundidade = profundidade,
-            Total = resultado.TotalRegistros,
-            Dados = resultado.Dados,
-            Debug = new { SqlGerado = resultado.SqlGerado }
-        });
-    }
-
-    [HttpGet("tabelas-disponiveis")]
-    public IActionResult ListarTabelasDisponiveis()
-    {
-        var tabelas = new[] { "CLIENTES", "PEDIDOS", "PRODUTOS",
-                              "CATEGORIAS", "ITENS_PEDIDO", "ENDERECOS" };
-
-        return Ok(new
-        {
-            Total = tabelas.Length,
-            Tabelas = tabelas.OrderBy(t => t),
-            Observacao = "Use GET /api/ConsultaDinamica/{tabela} para consultar"
-        });
+            stopwatch.Stop();
+            _logger.LogError(ex, "Erro ao executar {RequestName}", requestName);
+            throw;
+        }
     }
 }
 ```
 
-**Vantagens:**
-- Controller "magro" (apenas orquestração)
-- Sem try/catch (tratado nos behaviors)
-- Sem validações manuais (pipeline automático)
-- Sem logs manuais (LoggingBehavior)
-- Testável (mockar IMediator)
+---
+
+### 4. **Notification Pattern**
+
+```csharp
+public record Notification(string Key, string Message);
+
+public interface INotificationContext
+{
+    void AddNotification(string key, string message);
+    void AddNotifications(IEnumerable<Notification> notifications);
+    bool HasNotifications { get; }
+    IReadOnlyCollection<Notification> Notifications { get; }
+    void Clear();
+}
+
+public class NotificationContext : INotificationContext
+{
+    private readonly List<Notification> _notifications = new();
+
+    public void AddNotification(string key, string message)
+        => _notifications.Add(new Notification(key, message));
+
+    public void AddNotifications(IEnumerable<Notification> notifications)
+        => _notifications.AddRange(notifications);
+
+    public bool HasNotifications => _notifications.Any();
+
+    public IReadOnlyCollection<Notification> Notifications => _notifications.AsReadOnly();
+
+    public void Clear() => _notifications.Clear();
+}
+```
 
 ---
 
-### 7. **Dependency Injection**
-
-**Objetivo:** Registrar todos os componentes CQRS no DI Container.
+### 5. **Dependency Injection**
 
 ```csharp
-// DependencyInjection.cs
 public static IServiceCollection AddInfrastructure(
     this IServiceCollection services,
     IConfiguration configuration)
 {
-    // ... outros registros ...
-
     // Notification Context (Scoped - por request)
     services.AddScoped<INotificationContext, NotificationContext>();
 
@@ -450,7 +417,7 @@ public static IServiceCollection AddInfrastructure(
     {
         cfg.RegisterServicesFromAssembly(domainAssembly);
 
-        // Registrar behaviors na ordem: Logging → Validation → Handler
+        // Ordem dos behaviors: Logging → Validation → Handler
         cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
         cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
     });
@@ -458,258 +425,114 @@ public static IServiceCollection AddInfrastructure(
     // FluentValidation - Assembly Scanning automático
     services.AddValidatorsFromAssembly(domainAssembly);
 
+    // Repositories (usados direto em GETs)
+    services.AddScoped<IMetadadosRepository, MetadadosRepository>();
+    services.AddScoped<IConsultaDinamicaRepository, ConsultaDinamicaRepository>();
+
+    // Domain Services (usados direto em GETs)
+    services.AddScoped<IMetadadosDomainService, MetadadosDomainService>();
+    services.AddScoped<ConsultaDinamicaDomainService>();
+
     return services;
 }
 ```
 
-**Características:**
-- **Assembly Scanning:** MediatR encontra automaticamente todos os Handlers
-- **Assembly Scanning:** FluentValidation encontra automaticamente todos os Validators
-- **Ordem dos Behaviors:** Logging → Validation → Handler (importante!)
-- **Lifetime:** Scoped para NotificationContext (uma instância por request)
-
 ---
 
-## 8. **Unit of Work Pattern**
+## 🔄 Fluxo Completo
 
-**Objetivo:** Gerenciar transações de banco de dados de forma centralizada e consistente.
-
-```csharp
-// IUnitOfWork.cs
-public interface IUnitOfWork : IDisposable
+### Command (POST) - COM MediatR
+```
+POST /api/metadados
 {
-    IDbTransaction BeginTransaction();
-    void Commit();
-    void Rollback();
-    IDbTransaction? Transaction { get; }
+  "tabela": "CLIENTES",
+  "camposDisponiveis": "ID,NOME,EMAIL"
 }
 
-// UnitOfWork.cs
-public class UnitOfWork : IUnitOfWork
-{
-    private readonly IDbConnection _connection;
-    private IDbTransaction? _transaction;
+Controller
+    ↓ _mediator.Send(CriarMetadadoCommand)
+MediatR Pipeline
+    ↓ LoggingBehavior (log início + timing)
+    ↓ ValidationBehavior (FluentValidation)
+        • Tabela NotEmpty? ✅
+        • Tabela Matches regex? ✅
+    ↓ CriarMetadadoCommandHandler
+        • _domainService.CriarAsync()
+        • Regras de negócio
+        • _repository.CriarAsync()
+    ↓ LoggingBehavior (log fim)
+Controller
+    ↓ return CreatedAtAction(...)
 
-    public UnitOfWork(IDbConnection connection)
-    {
-        _connection = connection;
-    }
-
-    public IDbTransaction BeginTransaction()
-    {
-        if (_connection.State != ConnectionState.Open)
-            _connection.Open();
-        _transaction = _connection.BeginTransaction();
-        return _transaction;
-    }
-
-    public void Commit()
-    {
-        try
-        {
-            _transaction?.Commit();
-        }
-        catch
-        {
-            _transaction?.Rollback();
-            throw;
-        }
-        finally
-        {
-            _transaction?.Dispose();
-            _transaction = null;
-        }
-    }
-    // ... Rollback e Dispose
-}
+HTTP 201 Created
 ```
 
-**Características:**
-- Abstrai o controle de transação do Dapper
-- Permite que múltiplos repositórios compartilhem a mesma transação
-- Registrado como Scoped no DI
-- Pronto para ser usado nos CommandHandlers
-
----
-
-## 🔄 Fluxo Completo de Execução
-
+### Query (GET) - SEM MediatR
 ```
-1. HTTP Request: GET /api/ConsultaDinamica/CLIENTES?incluirJoins=true&profundidade=2
+GET /api/metadados
 
-2. Controller:
-   ├─ Cria: new ConsultaDinamicaQuery("CLIENTES", true, 2)
-   └─ Chama: await _mediator.Send(query)
+Controller
+    ↓ _repository.ObterTodosAsync() [DIRETO!]
+Repository
+    ↓ Execute SQL with Dapper
+Controller
+    ↓ return Ok(...)
 
-3. MediatR:
-   ├─ Identifica: IRequest<ConsultaDinamicaResult>
-   ├─ Resolve Handler: ConsultaDinamicaQueryHandler (do DI)
-   └─ Executa Pipeline:
-
-4. LoggingBehavior:
-   ├─ Log: "Iniciando ConsultaDinamicaQuery"
-   ├─ Inicia Stopwatch
-   └─ Chama: await next()
-
-5. ValidationBehavior:
-   ├─ Resolve Validators: ConsultaDinamicaQueryValidator (do DI)
-   ├─ Executa validações:
-   │  ├─ Tabela NotEmpty? ✅
-   │  ├─ Tabela in whitelist? ✅ "CLIENTES" OK
-   │  └─ Profundidade 1-3? ✅ 2 OK
-   ├─ Validação passou ✅
-   └─ Chama: await next()
-
-6. ConsultaDinamicaQueryHandler:
-   ├─ Chama: _MetaQuery.MontarQuery("CLIENTES", true, 2)
-   ├─ SQL gerado: "SELECT C.*, P.* FROM CLIENTES C LEFT JOIN PEDIDOS P..."
-   ├─ Chama: _repository.ExecutarConsultaAsync(sqlQuery)
-   ├─ Banco retorna: 150 registros
-   └─ Retorna: ConsultaDinamicaResult(...)
-
-7. Volta para ValidationBehavior:
-   └─ Passa resultado para próximo behavior
-
-8. Volta para LoggingBehavior:
-   ├─ Para Stopwatch: 87ms
-   ├─ Log: "ConsultaDinamicaQuery executado com sucesso em 87ms"
-   └─ Retorna resultado
-
-9. Volta para Controller:
-   ├─ Verifica: _notificationContext.HasNotifications? ❌ false
-   ├─ Verifica: resultado == null? ❌ false
-   └─ Retorna: Ok(200) com dados
-
-10. HTTP Response: 200 OK
-    {
-      "tabela": "CLIENTES",
-      "incluiJoins": true,
-      "profundidade": 2,
-      "total": 150,
-      "dados": [...],
-      "debug": { "sqlGerado": "SELECT..." }
-    }
+HTTP 200 OK
 ```
 
 ---
 
-## ⚠️ Exemplo com Validação Falha
+## 📊 Métricas Finais
 
+### Arquivos Removidos
 ```
-1. HTTP Request: GET /api/ConsultaDinamica/USUARIOS?profundidade=5
-
-2. Controller → MediatR → LoggingBehavior → ValidationBehavior
-
-3. ValidationBehavior:
-   ├─ Tabela in whitelist? ❌ "USUARIOS" não permitido
-   ├─ Profundidade 1-3? ❌ 5 fora do range
-   ├─ Adiciona notificações:
-   │  ├─ ("Tabela", "Tabela não está autorizada")
-   │  └─ ("Profundidade", "Profundidade deve estar entre 1 e 3")
-   └─ Retorna: default(ConsultaDinamicaResult) → null
-       ⚠️ NÃO CHAMA O HANDLER!
-
-4. Volta para Controller:
-   ├─ Verifica: _notificationContext.HasNotifications? ✅ true
-   └─ Retorna: BadRequest(400)
-
-5. HTTP Response: 400 Bad Request
-   {
-     "erros": [
-       { "campo": "Tabela", "mensagem": "Tabela não está autorizada" },
-       { "campo": "Profundidade", "mensagem": "Profundidade deve estar entre 1 e 3" }
-     ]
-   }
+❌ 11 arquivos de Queries + QueryHandlers deletados
+❌ ~600 linhas de código removidas
 ```
 
----
-
-## 📊 Métricas
-
-### Build:
+### Build
 ```
 ✅ Compilação: SUCCESS
-⏱️  Tempo: 3.8s
-📦 Projetos: 6 (todos compilados com sucesso)
-⚠️  Avisos: 4 (NU1608 - compatibilidade MediatR, não bloqueante)
+✅ Testes: 21/21 passando
+⏱️  Tempo: 6.3s
+⚠️  Avisos: 7 (MediatR version, nullability - não-críticos)
 ❌ Erros: 0
 ```
 
-### Redução de Código:
+### Conformidade
 ```
-ConsultaDinamicaController:
-  Antes: 315 linhas
-  Depois: 108 linhas
-  Redução: 65.7%
-```
-
-### Arquivos Criados:
-```
-Total: 8 novos arquivos
-  ├─ Queries: 1
-  ├─ Handlers: 1
-  ├─ Notifications: 3
-  ├─ Behaviors: 2
-  └─ Validators: 1
+✅ Padrão Herval: 100%
+✅ Feature Folders: ✓
+✅ FluentValidation: ✓
+✅ Behaviors (MediatR): ✓
+✅ Queries sem MediatR: ✓
+✅ CQRS Pragmático: ✓
 ```
 
 ---
 
-## 🎯 Vantagens Obtidas
+## 🎯 Vantagens do Padrão Herval
 
-### 1. **Separação de Responsabilidades**
-- Controller: apenas orquestração
-- Handler: lógica de negócio
-- Validator: regras de validação
-- Behaviors: cross-cutting concerns
+### 1. **Simplicidade para Queries**
+- Leituras diretas = mais fácil de entender
+- Menos camadas = melhor performance
+- Código mais conciso
 
-### 2. **Reusabilidade**
-- Behaviors funcionam para TODAS as queries/commands automaticamente
-- Validators podem ser compartilhados
-- Handlers isolados e independentes
+### 2. **Poder para Commands**
+- Validação automática (ValidationBehavior)
+- Logging automático (LoggingBehavior)
+- Separação clara de responsabilidades
+- Testabilidade máxima
 
-### 3. **Testabilidade**
-- Cada componente pode ser testado isoladamente
-- Mockar IMediator é simples
-- Validators independentes de infraestrutura
+### 3. **CQRS Verdadeiro**
+- Commands = Complexos (precisam pipeline)
+- Queries = Simples (não precisam overhead)
 
 ### 4. **Manutenibilidade**
-- Adicionar nova query = criar Query + Handler + Validator (sem tocar controller)
-- Código menor e mais legível
-- Convenções claras (CQRS pattern)
-
-### 5. **Performance**
-- Overhead mínimo (~5-10ms para pipeline)
-- Logs e validações executam de forma eficiente
-- Assembly scanning acontece apenas no startup
-
-### 6. **Padrão Corporativo**
-- Alinhado com Herval (empresa do usuário)
-- Facilita onboarding de novos devs
-- Mantém consistência entre projetos
-
----
-
-## 🚀 Próximos Passos
-
-1. **Testar Endpoints** ⏳
-   - Validar pipeline MediatR funcionando
-   - Testar NotificationContext em erros
-   - Confirmar performance
-
-2. **Criar Queries para Metadados** ⏳
-   - ObterMetadadosQuery
-   - ObterMetadadoPorIdQuery
-   - ObterMetadadoPorTabelaQuery
-
-3. **Implementar Commands** ⏳
-   - CriarMetadadoCommand
-   - AtualizarMetadadoCommand
-   - DesativarMetadadoCommand
-   - Unit of Work para transações
-
-4. **Refatorar MetadadosController** ⏳
-   - Aplicar mesmo padrão CQRS
+- Adicionar query = 1 método no repository
+- Adicionar command = 3 arquivos em pasta de feature
+- Padrões claros e consistentes
 
 ---
 
@@ -718,4 +541,4 @@ Total: 8 novos arquivos
 - [MediatR Documentation](https://github.com/jbogard/MediatR)
 - [FluentValidation Documentation](https://docs.fluentvalidation.net/)
 - [CQRS Pattern by Martin Fowler](https://martinfowler.com/bliki/CQRS.html)
-- [Notification Pattern](https://martinfowler.com/articles/replaceThrowWithNotification.html)
+- Padrão Herval (documentação interna da empresa)

@@ -1,7 +1,6 @@
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using MetaQuery.Domain.DomainServices;
 using MetaQuery.Domain.Interfaces;
-using MetaQuery.Domain.Queries;
 
 namespace MetaQuery.Api.Controllers;
 
@@ -12,12 +11,14 @@ namespace MetaQuery.Api.Controllers;
 [Route("api/[controller]")]
 public class ConsultaDinamicaController : ControllerBase
 {
-    private readonly IMediator _mediator;
+    private readonly ConsultaDinamicaDomainService _consultaService;
     private readonly IMetadadosRepository _metadadosRepository;
 
-    public ConsultaDinamicaController(IMediator mediator, IMetadadosRepository metadadosRepository)
+    public ConsultaDinamicaController(
+        ConsultaDinamicaDomainService consultaService,
+        IMetadadosRepository metadadosRepository)
     {
-        _mediator = mediator;
+        _consultaService = consultaService;
         _metadadosRepository = metadadosRepository;
     }
 
@@ -25,12 +26,9 @@ public class ConsultaDinamicaController : ControllerBase
     /// Consulta dados de uma tabela dinamicamente
     /// </summary>
     [HttpGet("{tabela}")]
-    public async Task<IActionResult> Consultar(
-        string tabela,
-        [FromQuery] bool incluirJoins = false,
-        [FromQuery] int profundidade = 2)
+    public async Task<IActionResult> Consultar(string tabela, [FromQuery] bool incluirJoins = false, [FromQuery] int profundidade = 2)
     {
-        var resultado = await _mediator.Send(new ConsultaDinamicaQuery(tabela, incluirJoins, profundidade));
+        var resultado = await _consultaService.ConsultarTabelaAsync(tabela, incluirJoins, profundidade);
         return Ok(resultado);
     }
 

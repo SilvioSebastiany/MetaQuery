@@ -28,27 +28,27 @@
             "stopAtEntry": false
         },
         {
-            "name": "QueryBuilder.Tests - Debug",
+            "name": "MetaQuery.Tests - Debug",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
             "program": "dotnet",
             "args": [
                 "test",
-                "${workspaceFolder}/QueryBuilder.Tests/QueryBuilder.Tests.csproj"
+                "${workspaceFolder}/MetaQuery.Tests/MetaQuery.Tests.csproj"
             ],
-            "cwd": "${workspaceFolder}/QueryBuilder.Tests",
+            "cwd": "${workspaceFolder}/MetaQuery.Tests",
             "console": "integratedTerminal",
             "stopAtEntry": false
         },
         {
-            "name": "QueryBuilder.Api - Debug (HTTP)",
+            "name": "MetaQuery.Api - Debug (HTTP)",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "prepare-api-debug",
-            "program": "${workspaceFolder}/src/QueryBuilder.Api/bin/Debug/net9.0/QueryBuilder.Api.dll",
+            "program": "${workspaceFolder}/src/MetaQuery.Api/bin/Debug/net9.0/MetaQuery.Api.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/src/QueryBuilder.Api",
+            "cwd": "${workspaceFolder}/src/MetaQuery.Api",
             "stopAtEntry": false,
             "console": "integratedTerminal",
             "env": {
@@ -62,13 +62,13 @@
             }
         },
         {
-            "name": "QueryBuilder.Api - Debug (HTTPS)",
+            "name": "MetaQuery.Api - Debug (HTTPS)",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "prepare-api-debug",
-            "program": "${workspaceFolder}/src/QueryBuilder.Api/bin/Debug/net9.0/QueryBuilder.Api.dll",
+            "program": "${workspaceFolder}/src/MetaQuery.Api/bin/Debug/net9.0/MetaQuery.Api.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/src/QueryBuilder.Api",
+            "cwd": "${workspaceFolder}/src/MetaQuery.Api",
             "stopAtEntry": false,
             "console": "integratedTerminal",
             "env": {
@@ -82,7 +82,7 @@
             }
         },
         {
-            "name": "QueryBuilder.Api - Attach to Container",
+            "name": "MetaQuery.Api - Attach to Container",
             "type": "coreclr",
             "request": "attach",
             "processId": "${command:pickRemoteProcess}",
@@ -109,3 +109,4 @@
         }
     ]
 }
+

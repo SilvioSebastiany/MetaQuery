@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using MetaQuery.Domain.Commands.CriarMetadado;
 using MetaQuery.Domain.Commands.AtualizarMetadado;
 using MetaQuery.Domain.Commands.DesativarMetadado;
-using MetaQuery.Domain.Queries.Metadados;
+using MetaQuery.Domain.Interfaces;
 
 namespace MetaQuery.Api.Controllers
 {
@@ -12,10 +12,14 @@ namespace MetaQuery.Api.Controllers
     public class MetadadosController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly IMetadadosRepository _repository;
 
-        public MetadadosController(IMediator mediator)
+        public MetadadosController(
+            IMediator mediator,
+            IMetadadosRepository repository)
         {
             _mediator = mediator;
+            _repository = repository;
         }
 
         /// <summary>
@@ -24,8 +28,12 @@ namespace MetaQuery.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> ObterTodos([FromQuery] bool apenasAtivos = true)
         {
-            var resultado = await _mediator.Send(new ObterTodosMetadadosQuery(apenasAtivos));
-            return Ok(resultado);
+            var metadados = await _repository.ObterTodosAsync(apenasAtivos);
+            return Ok(new
+            {
+                Total = metadados.Count(),
+                Metadados = metadados
+            });
         }
 
         /// <summary>
@@ -34,7 +42,7 @@ namespace MetaQuery.Api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> ObterPorId(int id)
         {
-            var metadado = await _mediator.Send(new ObterMetadadoPorIdQuery(id));
+            var metadado = await _repository.ObterPorIdAsync(id);
             return metadado == null ? NotFound() : Ok(metadado);
         }
 
@@ -44,7 +52,7 @@ namespace MetaQuery.Api.Controllers
         [HttpGet("tabela/{nomeTabela}")]
         public async Task<IActionResult> ObterPorTabela(string nomeTabela)
         {
-            var metadado = await _mediator.Send(new ObterMetadadoPorTabelaQuery(nomeTabela));
+            var metadado = await _repository.ObterPorNomeTabelaAsync(nomeTabela);
             return metadado == null ? NotFound() : Ok(metadado);
         }
 
