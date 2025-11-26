@@ -1,0 +1,403 @@
+Vou analisar a estrutura do projeto para entender como funciona a execução em homologação e produção. 
+
+Read [](file:///c%3A/Fontes/produtos/src/Ecommerce.Servicos.Produtos.Api/appsettings.json#1-1), lines 1 to 50
+
+Read [](file:///c%3A/Fontes/produtos/src/Ecommerce.Servicos.Produtos.Api/appsettings.Staging.json#1-1), lines 1 to 50
+
+Read [](file:///c%3A/Fontes/produtos/src/Ecommerce.Servicos.Produtos.Api/appsettings.Development.json#1-1), lines 1 to 50
+
+Read [](file:///c%3A/Fontes/produtos/src/Ecommerce.Servicos.Produtos.Api/Program.cs)
+
+Read [](file:///c%3A/Fontes/produtos/src/Ecommerce.Servicos.Produtos.Api/Startup.cs)
+
+Searched for files matching `**/Dockerfile`, no matches
+
+Searched for files matching `**/*.yaml`, no matches
+
+Searched for files matching `**/*.yml`, 1 match
+
+Read [](file:///c%3A/Fontes/produtos/scripts)
+
+Read [](file:///c%3A/Fontes/produtos/.gitlab-ci.yml#1-1), lines 1 to 200
+
+Read [](file:///c%3A/Fontes/produtos/docs)
+
+Read [](file:///c%3A/Fontes/produtos/README.md#1-1), lines 1 to 50
+
+Read [](file:///c%3A/Fontes/produtos/.gitlab-ci.yml#200-200), lines 200 to 215
+
+Searched for regex `ASPNETCORE_ENVIRONMENT|Environment` (`**/src/**/*.csproj`), no results
+
+Read [](file:///c%3A/Fontes/produtos/src/Ecommerce.Servicos.Produtos.Api/Ecommerce.Servicos.Produtos.Api.csproj)
+
+Searched for files matching `**/web.config`, no matches
+
+Searched for regex `ASPNETCORE_ENVIRONMENT|IsDevelopment\(\)|IsStaging\(\)|IsProduction\(\)` (`**/src/**/*.cs`), 2 results
+
+Read [](file:///c%3A/Fontes/produtos/src/Ecommerce.Servicos.Produtos.Robo/Factories/ConfigurationFactory.cs)
+
+Perfeito! Analisei completamente a estrutura do projeto. Agora vou criar um documento passo a passo detalhado sobre como funciona a execução em homologação e produção.
+
+## 📋 Passo a Passo: Execução em Homologação e Produção
+
+Baseado na análise do projeto **Ecommerce.Servicos.Produtos**, aqui está o guia completo para implementar em outro projeto:
+
+---
+
+## 🎯 **1. ESTRUTURA DE AMBIENTES**
+
+O projeto utiliza 3 ambientes distintos, cada um com suas configurações:
+
+### **Ambientes:**
+- **Development** (Desenvolvimento local)
+- **Staging** (Homologação)
+- **Production** (Produção)
+
+---
+
+## 📁 **2. ARQUIVOS DE CONFIGURAÇÃO (appsettings)**
+
+### **Criar 3 arquivos de configuração:**
+
+```
+appsettings.json              → Configuração base (geralmente produção)
+appsettings.Development.json  → Configuração de desenvolvimento
+appsettings.Staging.json      → Configuração de homologação
+```
+
+### **Conteúdo de cada arquivo:**
+
+Cada arquivo deve ter configurações específicas do ambiente:
+
+- **Connection Strings** (banco de dados de cada ambiente)
+- **Endpoints de APIs externas** (URLs diferentes por ambiente)
+- **Tokens de autenticação** (credenciais por ambiente)
+- **URLs de SSO/Autenticação**
+- **Configurações de logging**
+
+**Exemplo:**
+
+```json
+// appsettings.Staging.json
+{
+  "ConnectionStrings": {
+    "HServices": "DATA SOURCE=servidor-homolog;..."
+  },
+  "Autenticacao": {
+    "Endpoint": "https://hml-sso.exemplo.com.br/auth",
+    "Scope": "meu-escopo"
+  },
+  "ApiExterna": {
+    "Token": "token-homologacao",
+    "Endpoint": "https://api-hml.exemplo.com/"
+  }
+}
+
+// appsettings.json (Production)
+{
+  "ConnectionStrings": {
+    "HServices": "DATA SOURCE=servidor-producao;..."
+  },
+  "Autenticacao": {
+    "Endpoint": "https://sso.exemplo.com.br/auth",
+    "Scope": "meu-escopo"
+  },
+  "ApiExterna": {
+    "Token": "token-producao",
+    "Endpoint": "https://api.exemplo.com/"
+  }
+}
+```
+
+---
+
+## ⚙️ **3. CONFIGURAÇÃO DO .CSPROJ**
+
+No arquivo `.csproj` da API, garantir que os arquivos de configuração sejam copiados:
+
+```xml
+<ItemGroup>
+  <Content Update="appsettings.Development.json">
+    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+  </Content>
+  <Content Update="appsettings.json">
+    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+  </Content>
+  <Content Update="appsettings.Staging.json">
+    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+  </Content>
+</ItemGroup>
+```
+
+---
+
+## 🔧 **4. CONFIGURAÇÃO DO STARTUP.CS**
+
+O Startup.cs detecta automaticamente o ambiente através do `IWebHostEnvironment`:
+
+```csharp
+public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+{
+    // Comportamento diferente para produção
+    if (env.IsProduction())
+    {
+        app.UseHsts();
+    }
+    else
+    {
+        app.UseDeveloperExceptionPage();
+    }
+    
+    // Configurações comuns
+    app.UseAuthentication();
+    app.UseRouting();
+    // ...
+}
+```
+
+**Métodos disponíveis:**
+- `env.IsDevelopment()` - Verifica se é Development
+- `env.IsStaging()` - Verifica se é Staging/Homologação
+- `env.IsProduction()` - Verifica se é Produção
+
+---
+
+## 🌍 **5. VARIÁVEL DE AMBIENTE (ASPNETCORE_ENVIRONMENT)**
+
+O ASP.NET Core usa a variável de ambiente `ASPNETCORE_ENVIRONMENT` para determinar qual arquivo de configuração carregar:
+
+### **Como funciona:**
+
+```
+ASPNETCORE_ENVIRONMENT=Development → Carrega appsettings.Development.json
+ASPNETCORE_ENVIRONMENT=Staging     → Carrega appsettings.Staging.json
+ASPNETCORE_ENVIRONMENT=Production  → Carrega appsettings.json
+(vazio ou não definido)            → Carrega appsettings.json (padrão)
+```
+
+### **Exemplo de código para projetos Console/Robo:**
+
+```csharp
+public class ConfigurationFactory
+{
+    private readonly string appSettingsFileName;
+
+    public ConfigurationFactory()
+    {
+        var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
+        appSettingsFileName = string.IsNullOrEmpty(environment)
+            ? "appsettings.json" 
+            : $"appsettings.{environment}.json";
+    }
+
+    public IConfiguration Generate()
+    {
+        return new ConfigurationBuilder()
+          .AddJsonFile(appSettingsFileName, true, true)
+          .Build();
+    }
+}
+```
+
+---
+
+## 🚀 **6. PIPELINE CI/CD (GitLab CI)**
+
+### **Estrutura do Pipeline:**
+
+```yaml
+stages:
+  - build          # Compilação
+  - staging        # Deploy em homologação
+  - production     # Deploy em produção
+```
+
+### **6.1. Stage BUILD (Compilação)**
+
+```yaml
+build_api:
+  stage: build
+  tags:
+    - integracao
+  script:
+    - "cd src/MeuProjeto.Api"
+    - "dotnet build --source $NUGET_HERVAL_URL --source $NUGET_URL"
+  only:
+    changes:
+      - src/**/*  # Só executa se houver mudanças no código
+```
+
+### **6.2. Stage STAGING (Homologação - Automático)**
+
+```yaml
+staging_api:
+  stage: staging
+  tags:
+    - integracao
+  variables:
+    project_name: "Api"
+    remote_path: "MeuProjeto/Api"
+  only:
+    refs:
+      - develop  # Só executa na branch develop
+    changes:
+      - src/**/*
+  
+  before_script:
+    # Instala ferramenta FTP
+    - "apt-get update -qq && apt-get install -y -qq lftp"
+    
+    # Cria pasta de manutenção e copia app_offline.htm
+    - mkdir AppOff
+    - lftp -u $FTP_USERNAME,$FTP_PASSWORD $FTP_HOST_STAGING 
+        -e "mirror --verbose StaticDevel/manutencao AppOff; quit"
+    
+    # Envia app_offline.htm para servidor (coloca site em manutenção)
+    - lftp -u $FTP_USERNAME,$FTP_PASSWORD $FTP_HOST_STAGING 
+        -e "mirror --verbose -R -p AppOff $remote_path; quit"
+
+  script:
+    # Publica aplicação para Windows
+    - "cd src/MeuProjeto.Api"
+    - "dotnet publish -c Release -o bin/release/publish 
+        --source $NUGET_HERVAL_URL 
+        --source $NUGET_URL 
+        --runtime win-x64 
+        --self-contained"
+    
+    # Envia arquivos publicados para servidor via FTP
+    - lftp -u $FTP_USERNAME,$FTP_PASSWORD $FTP_HOST_STAGING 
+        -e "mirror -v -R -p bin/release/publish $remote_path; quit"
+
+  after_script:
+    # Remove app_offline.htm (retira site de manutenção)
+    - lftp -e "cd $remote_path && rm -f app_offline.htm" 
+        -u $FTP_USERNAME,$FTP_PASSWORD $FTP_HOST_STAGING
+
+  environment:
+    name: staging
+    url: https://hml-api.exemplo.com.br/meuprojeto
+```
+
+### **6.3. Stage PRODUCTION (Produção - Manual)**
+
+```yaml
+production_api:
+  stage: production
+  tags:
+    - integracao
+  variables:
+    project_name: "Api"
+    remote_path: "MeuProjeto/Api"
+  when: manual  # IMPORTANTE: Requer aprovação manual
+  only:
+    refs:
+      - master  # Só executa na branch master
+    changes:
+      - src/**/*
+  
+  before_script:
+    # Mesmo processo de staging: manutenção antes do deploy
+    - "apt-get update -qq && apt-get install -y -qq lftp"
+    - mkdir AppOff
+    - lftp -u $FTP_USERNAME,$FTP_PASSWORD $FTP_HOST_PRODUCTION 
+        -e "mirror --verbose -R -p AppOff $remote_path; quit"
+
+  script:
+    - "cd src/MeuProjeto.Api"
+    - "dotnet publish -c Release -o bin/release/publish 
+        --source $NUGET_HERVAL_URL 
+        --source $NUGET_URL 
+        --runtime win-x64 
+        --self-contained"
+    - lftp -u $FTP_USERNAME,$FTP_PASSWORD $FTP_HOST_PRODUCTION 
+        -e "mirror -v -R -p bin/release/publish $remote_path; quit"
+
+  after_script:
+    - lftp -e "cd $remote_path && rm -f app_offline.htm" 
+        -u $FTP_USERNAME,$FTP_PASSWORD $FTP_HOST_PRODUCTION
+
+  environment:
+    name: production
+    url: https://api.exemplo.com.br/meuprojeto
+```
+
+---
+
+## 🎯 **7. FLUXO COMPLETO DE DEPLOY**
+
+### **HOMOLOGAÇÃO (Staging):**
+
+1. **Desenvolvedor** faz commit na branch `develop`
+2. **GitLab CI** detecta mudanças em `src/**/*`
+3. **Stage BUILD** executa: compilação do projeto
+4. **Stage STAGING** executa automaticamente:
+   - Coloca site em manutenção (`app_offline.htm`)
+   - Publica aplicação com configuração de Release
+   - Envia arquivos via FTP para servidor de homologação
+   - Remove arquivo de manutenção
+5. **Aplicação disponível** em: `https://hml-api.exemplo.com.br`
+
+### **PRODUÇÃO (Production):**
+
+1. **Desenvolvedor** faz merge para branch `master`
+2. **GitLab CI** detecta mudanças em `src/**/*`
+3. **Stage BUILD** executa: compilação do projeto
+4. **Stage PRODUCTION** fica aguardando **aprovação manual** ⚠️
+5. **Responsável** aprova manualmente no GitLab
+6. **Deploy executa**:
+   - Coloca site em manutenção
+   - Publica aplicação
+   - Envia arquivos via FTP para servidor de produção
+   - Remove arquivo de manutenção
+7. **Aplicação disponível** em: `https://api.exemplo.com.br`
+
+---
+
+## 📝 **8. VARIÁVEIS DO GITLAB CI**
+
+Configure as seguintes variáveis no GitLab (Settings → CI/CD → Variables):
+
+```
+NUGET_HERVAL_URL       - URL do NuGet privado
+NUGET_URL              - URL do NuGet público
+FTP_USERNAME           - Usuário FTP
+FTP_PASSWORD           - Senha FTP (protegida)
+FTP_HOST_STAGING       - Host FTP de homologação
+FTP_HOST_PRODUCTION    - Host FTP de produção
+```
+
+---
+
+## ✅ **9. CHECKLIST DE IMPLEMENTAÇÃO**
+
+Para implementar em outro projeto:
+
+- [ ] Criar appsettings.Development.json com configs de desenvolvimento
+- [ ] Criar appsettings.Staging.json com configs de homologação
+- [ ] Criar/ajustar appsettings.json com configs de produção
+- [ ] Configurar `.csproj` para copiar os appsettings
+- [ ] Ajustar Startup.cs para comportamentos por ambiente
+- [ ] Criar arquivo .gitlab-ci.yml na raiz do projeto
+- [ ] Configurar stages: build, staging, production
+- [ ] Configurar variáveis de ambiente no GitLab
+- [ ] Definir branch `develop` para staging
+- [ ] Definir branch `master` para production
+- [ ] Testar deploy em staging primeiro
+- [ ] Configurar aprovação manual para production
+
+---
+
+## 🔑 **10. PONTOS IMPORTANTES**
+
+1. **Arquivo app_offline.htm**: Coloca aplicação ASP.NET em manutenção durante deploy
+2. **--self-contained**: Inclui o runtime .NET no pacote publicado
+3. **--runtime win-x64**: Especifica que é para Windows 64 bits
+4. **when: manual**: Garante que produção só seja atualizada com aprovação
+5. **only.refs**: Controla quais branches disparam o deploy
+6. **only.changes**: Só executa se houver mudanças no código fonte
+
+---
+
+Esse é o fluxo completo usado no projeto analisado! Você pode adaptar conforme sua infraestrutura (Docker, Kubernetes, Azure DevOps, etc.).

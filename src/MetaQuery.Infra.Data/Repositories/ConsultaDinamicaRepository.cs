@@ -49,6 +49,27 @@ public class ConsultaDinamicaRepository : IConsultaDinamicaRepository
 
             return resultados;
         }
+        catch (Oracle.ManagedDataAccess.Client.OracleException oraEx) when (oraEx.Number == 942)
+        {
+            // ORA-00942: tabela não existe
+            _logger.LogWarning(oraEx, "Tabela não encontrada no banco. SQL: {Sql}", compiled.Sql);
+
+            var msg = "A tabela consultada está cadastrada nos metadados mas não existe no banco de dados. " +
+                      "Verifique se a tabela foi criada ou se o nome está correto.";
+
+            throw new ArgumentException(msg, nameof(query), oraEx);
+        }
+        catch (Oracle.ManagedDataAccess.Client.OracleException oraEx) when (oraEx.Number == 904)
+        {
+            // ORA-00904: coluna não existe
+            var columnName = ExtractColumnName(oraEx.Message);
+            _logger.LogWarning(oraEx, "Coluna '{ColumnName}' não encontrada. SQL: {Sql}", columnName, compiled.Sql);
+
+            var msg = $"A coluna '{columnName}' está cadastrada nos metadados mas não existe na tabela. " +
+                      $"Verifique se o campo foi criado ou se o nome está correto na TABELA_DINAMICA.";
+
+            throw new ArgumentException(msg, nameof(query), oraEx);
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Erro ao executar query dinâmica. SQL: {Sql}", compiled.Sql);
@@ -147,6 +168,29 @@ public class ConsultaDinamicaRepository : IConsultaDinamicaRepository
         {
             _logger.LogError(ex, "Erro ao executar query tipada. SQL: {Sql}", compiled.Sql);
             throw new InvalidOperationException($"Erro ao executar consulta tipada: {ex.Message}", ex);
+        }
+    }
+
+    private string ExtractColumnName(string errorMessage)
+    {
+        try
+        {
+            var match = System.Text.RegularExpressions.Regex.Match(
+                errorMessage,
+                "\"([^\"]+)\"\\.\"([^\"]+)\"");
+
+            if (match.Success && match.Groups.Count >= 3)
+                return $"{match.Groups[1].Value}.{match.Groups[2].Value}";
+
+            var simpleMatch = System.Text.RegularExpressions.Regex.Match(
+                errorMessage,
+                "\"([^\"]+)\"");
+
+            return simpleMatch.Success ? simpleMatch.Groups[1].Value : "desconhecida";
+        }
+        catch
+        {
+            return "desconhecida";
         }
     }
 }

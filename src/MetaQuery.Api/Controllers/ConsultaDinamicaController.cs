@@ -26,10 +26,42 @@ public class ConsultaDinamicaController : ControllerBase
     /// Consulta dados de uma tabela dinamicamente
     /// </summary>
     [HttpGet("{tabela}")]
-    public async Task<IActionResult> Consultar(string tabela, [FromQuery] bool incluirJoins = false, [FromQuery] int profundidade = 2)
+    public async Task<IActionResult> Consultar(
+        string tabela,
+        [FromQuery] bool incluirJoins = false,
+        [FromQuery] int profundidade = 2,
+        [FromQuery] bool formatoHierarquico = false)
     {
-        var resultado = await _consultaService.ConsultarTabelaAsync(tabela, incluirJoins, profundidade);
-        return Ok(resultado);
+        try
+        {
+            var resultado = await _consultaService.ConsultarTabelaAsync(
+                tabela,
+                incluirJoins,
+                profundidade,
+                formatoHierarquico);
+
+            return Ok(new
+            {
+                Tabela = tabela,
+                Formato = formatoHierarquico ? "hierarchical" : "flat",
+                IncluiJoins = incluirJoins,
+                Profundidade = profundidade,
+                Total = resultado.TotalRegistros,
+                Dados = resultado.Dados,
+                Debug = new { SqlGerado = resultado.SqlGerado }
+            });
+        }
+        catch (ArgumentException ex)
+        {
+            // Tabela não existe no banco (ORA-00942)
+            return BadRequest(new
+            {
+                Erro = "Tabela não encontrada",
+                Mensagem = ex.Message,
+                Tabela = tabela,
+                Tipo = "TableNotFound"
+            });
+        }
     }
 
     /// <summary>

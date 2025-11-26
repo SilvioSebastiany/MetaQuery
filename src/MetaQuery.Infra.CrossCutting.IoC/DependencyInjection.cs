@@ -50,6 +50,9 @@ namespace MetaQuery.Infra.CrossCutting.IoC
             services.AddScoped<MetaQuery.Domain.DomainServices.ConsultaDinamicaDomainService>();
             services.AddScoped<MetaQuery.Domain.DomainServices.MetadadosDomainService>();
 
+            // HierarchicalGrouper (novo)
+            services.AddScoped<HierarchicalGrouper>();
+
             // SqlKata Compiler (Singleton pois é stateless)
             services.AddSingleton<OracleCompiler>();
 

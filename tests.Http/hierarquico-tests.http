@@ -1,0 +1,35 @@
+# 🧪 Testes - Agrupamento Hierárquico
+
+## 1. Formato Flat (Padrão)
+GET http://localhost:5249/api/consultadinamica/PEDIDOS?incluirJoins=true&profundidade=2
+Accept: application/json
+
+###
+
+## 2. Formato Hierárquico (NOVO!)
+GET http://localhost:5249/api/consultadinamica/PEDIDOS?incluirJoins=true&profundidade=2&formato=hierarchical
+Accept: application/json
+
+###
+
+## 3. Formato Hierárquico (português)
+GET http://localhost:5249/api/consultadinamica/PEDIDOS?incluirJoins=true&profundidade=2&formato=hierarquico
+Accept: application/json
+
+###
+
+## 4. Apenas tabela principal (sem joins)
+GET http://localhost:5249/api/consultadinamica/CLIENTES?incluirJoins=false
+Accept: application/json
+
+###
+
+## 5. Clientes com relacionamentos hierárquicos
+GET http://localhost:5249/api/consultadinamica/CLIENTES?incluirJoins=true&formato=hierarchical
+Accept: application/json
+
+###
+
+## 6. Produtos com relacionamentos
+GET http://localhost:5249/api/consultadinamica/PRODUTOS?incluirJoins=true&profundidade=3&formato=hierarquico
+Accept: application/json
