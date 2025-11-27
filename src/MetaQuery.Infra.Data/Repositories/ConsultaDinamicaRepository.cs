@@ -9,6 +9,7 @@ namespace MetaQuery.Infra.Data.Repositories;
 
 /// <summary>
 /// Repositório para execução de consultas dinâmicas geradas pelo QueryBuilderService
+/// Constitution 2.6: Todos os métodos async recebem e propagam CancellationToken via CommandDefinition
 /// </summary>
 public class ConsultaDinamicaRepository : IConsultaDinamicaRepository
 {
@@ -29,7 +30,7 @@ public class ConsultaDinamicaRepository : IConsultaDinamicaRepository
     /// <summary>
     /// Executa uma query dinâmica e retorna os resultados como objetos dinâmicos
     /// </summary>
-    public async Task<IEnumerable<dynamic>> ExecutarQueryAsync(Query query)
+    public async Task<IEnumerable<dynamic>> ExecutarQueryAsync(Query query, CancellationToken cancellationToken = default)
     {
         var compiled = _compiler.Compile(query);
 
@@ -38,11 +39,14 @@ public class ConsultaDinamicaRepository : IConsultaDinamicaRepository
 
         try
         {
-            var resultados = await _connection.QueryAsync<dynamic>(
+            var command = new CommandDefinition(
                 compiled.Sql,
                 compiled.NamedBindings,
-                commandTimeout: 30
+                commandTimeout: 30,
+                cancellationToken: cancellationToken
             );
+
+            var resultados = await _connection.QueryAsync<dynamic>(command);
 
             var total = resultados.Count();
             _logger.LogInformation("Query executada com sucesso. {Total} registros retornados", total);
@@ -80,7 +84,7 @@ public class ConsultaDinamicaRepository : IConsultaDinamicaRepository
     /// <summary>
     /// Executa uma query COUNT para obter o total de registros
     /// </summary>
-    public async Task<int> ExecutarQueryCountAsync(Query query)
+    public async Task<int> ExecutarQueryCountAsync(Query query, CancellationToken cancellationToken = default)
     {
         // Criar uma cópia da query original apenas com COUNT
         var countQuery = query.Clone().AsCount();
@@ -90,11 +94,14 @@ public class ConsultaDinamicaRepository : IConsultaDinamicaRepository
 
         try
         {
-            var count = await _connection.ExecuteScalarAsync<int>(
+            var command = new CommandDefinition(
                 compiled.Sql,
                 compiled.NamedBindings,
-                commandTimeout: 30
+                commandTimeout: 30,
+                cancellationToken: cancellationToken
             );
+
+            var count = await _connection.ExecuteScalarAsync<int>(command);
 
             _logger.LogInformation("COUNT executado com sucesso: {Count}", count);
 
@@ -110,7 +117,7 @@ public class ConsultaDinamicaRepository : IConsultaDinamicaRepository
     /// <summary>
     /// Executa uma query e retorna um único resultado tipado
     /// </summary>
-    public async Task<T?> ExecutarQuerySingleAsync<T>(Query query)
+    public async Task<T?> ExecutarQuerySingleAsync<T>(Query query, CancellationToken cancellationToken = default)
     {
         var compiled = _compiler.Compile(query);
 
@@ -118,11 +125,14 @@ public class ConsultaDinamicaRepository : IConsultaDinamicaRepository
 
         try
         {
-            var resultado = await _connection.QueryFirstOrDefaultAsync<T>(
+            var command = new CommandDefinition(
                 compiled.Sql,
                 compiled.NamedBindings,
-                commandTimeout: 30
+                commandTimeout: 30,
+                cancellationToken: cancellationToken
             );
+
+            var resultado = await _connection.QueryFirstOrDefaultAsync<T>(command);
 
             if (resultado == null)
             {
@@ -145,7 +155,7 @@ public class ConsultaDinamicaRepository : IConsultaDinamicaRepository
     /// <summary>
     /// Executa uma query e retorna resultados tipados
     /// </summary>
-    public async Task<IEnumerable<T>> ExecutarQueryAsync<T>(Query query)
+    public async Task<IEnumerable<T>> ExecutarQueryAsync<T>(Query query, CancellationToken cancellationToken = default)
     {
         var compiled = _compiler.Compile(query);
 
@@ -153,11 +163,14 @@ public class ConsultaDinamicaRepository : IConsultaDinamicaRepository
 
         try
         {
-            var resultados = await _connection.QueryAsync<T>(
+            var command = new CommandDefinition(
                 compiled.Sql,
                 compiled.NamedBindings,
-                commandTimeout: 30
+                commandTimeout: 30,
+                cancellationToken: cancellationToken
             );
+
+            var resultados = await _connection.QueryAsync<T>(command);
 
             var total = resultados.Count();
             _logger.LogInformation("Query tipada executada com sucesso. {Total} registros retornados", total);

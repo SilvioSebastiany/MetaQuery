@@ -4,7 +4,7 @@
 ### ===============================================
 
 @baseUrl = http://localhost:5249
-@apiPath = /api/ConsultaDinamica
+@apiPath = /api/consulta-dinamica
 
 ### ===============================================
 ### 1. TESTES BÁSICOS - GET /{tabela}

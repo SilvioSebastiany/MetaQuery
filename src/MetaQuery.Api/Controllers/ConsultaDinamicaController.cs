@@ -6,6 +6,7 @@ namespace MetaQuery.Api.Controllers;
 
 /// <summary>
 /// Controller para consultas dinâmicas
+/// Constitution 2.6: Todos os métodos async recebem CancellationToken
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
@@ -30,47 +31,35 @@ public class ConsultaDinamicaController : ControllerBase
         string tabela,
         [FromQuery] bool incluirJoins = false,
         [FromQuery] int profundidade = 2,
-        [FromQuery] bool formatoHierarquico = false)
+        [FromQuery] bool formatoHierarquico = false,
+        CancellationToken cancellationToken = default)
     {
-        try
-        {
-            var resultado = await _consultaService.ConsultarTabelaAsync(
-                tabela,
-                incluirJoins,
-                profundidade,
-                formatoHierarquico);
+        var resultado = await _consultaService.ConsultarTabelaAsync(
+            tabela,
+            incluirJoins,
+            profundidade,
+            formatoHierarquico,
+            cancellationToken);
 
-            return Ok(new
-            {
-                Tabela = tabela,
-                Formato = formatoHierarquico ? "hierarchical" : "flat",
-                IncluiJoins = incluirJoins,
-                Profundidade = profundidade,
-                Total = resultado.TotalRegistros,
-                Dados = resultado.Dados,
-                Debug = new { SqlGerado = resultado.SqlGerado }
-            });
-        }
-        catch (ArgumentException ex)
+        return Ok(new
         {
-            // Tabela não existe no banco (ORA-00942)
-            return BadRequest(new
-            {
-                Erro = "Tabela não encontrada",
-                Mensagem = ex.Message,
-                Tabela = tabela,
-                Tipo = "TableNotFound"
-            });
-        }
+            Tabela = tabela,
+            Formato = formatoHierarquico ? "hierarchical" : "flat",
+            IncluiJoins = incluirJoins,
+            Profundidade = profundidade,
+            Total = resultado.TotalRegistros,
+            Dados = resultado.Dados,
+            Debug = new { SqlGerado = resultado.SqlGerado }
+        });
     }
 
     /// <summary>
     /// Lista todas as tabelas disponíveis para consulta
     /// </summary>
     [HttpGet("tabelas-disponiveis")]
-    public async Task<IActionResult> ListarTabelasDisponiveis()
+    public async Task<IActionResult> ListarTabelasDisponiveis(CancellationToken cancellationToken = default)
     {
-        var metadados = await _metadadosRepository.ObterTodosAsync(apenasAtivos: true);
+        var metadados = await _metadadosRepository.ObterTodosAsync(apenasAtivos: true, cancellationToken: cancellationToken);
         var tabelas = metadados.Select(m => m.Tabela).OrderBy(t => t);
         return Ok(new { Total = tabelas.Count(), Tabelas = tabelas });
     }

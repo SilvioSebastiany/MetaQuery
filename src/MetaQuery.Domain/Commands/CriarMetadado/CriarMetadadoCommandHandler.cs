@@ -34,7 +34,7 @@ namespace MetaQuery.Domain.Commands.CriarMetadado
             _logger.LogInformation("Criando novo metadado para tabela: {Tabela}", request.Tabela);
 
             // Verificar se tabela já existe
-            var existe = await _repository.ExisteAsync(request.Tabela);
+            var existe = await _repository.ExisteAsync(request.Tabela, cancellationToken);
             if (existe)
             {
                 _notificationContext.AddNotification(
@@ -45,24 +45,32 @@ namespace MetaQuery.Domain.Commands.CriarMetadado
                 return 0;
             }
 
+            // Criar entidade de domínio usando factory method com NotificationContext
+            var metadado = TabelaDinamica.Criar(
+                tabela: request.Tabela,
+                camposDisponiveis: request.CamposDisponiveis,
+                chavePk: request.ChavePk,
+                vinculoEntreTabela: request.VinculoEntreTabela,
+                descricaoTabela: request.DescricaoTabela,
+                descricaoCampos: request.DescricaoCampos,
+                visivelParaIA: request.VisivelParaIA,
+                notificationContext: _notificationContext
+            );
+
+            // Verificar se entidade é válida antes de persistir (Constitution 2.4)
+            if (!metadado.IsValid || _notificationContext.HasNotifications)
+            {
+                _logger.LogWarning("Erro de validação ao criar metadado para tabela: {Tabela}", request.Tabela);
+                return 0;
+            }
+
             try
             {
                 // Iniciar transação
                 _unitOfWork.BeginTransaction();
 
-                // Criar entidade de domínio usando factory method
-                var metadado = TabelaDinamica.Criar(
-                    tabela: request.Tabela,
-                    camposDisponiveis: request.CamposDisponiveis,
-                    chavePk: request.ChavePk,
-                    vinculoEntreTabela: request.VinculoEntreTabela,
-                    descricaoTabela: request.DescricaoTabela,
-                    descricaoCampos: request.DescricaoCampos,
-                    visivelParaIA: request.VisivelParaIA
-                );
-
                 // Persistir no banco
-                var id = await _repository.CriarAsync(metadado);
+                var id = await _repository.CriarAsync(metadado, cancellationToken);
 
                 // Commit da transação
                 _unitOfWork.Commit();
@@ -72,16 +80,6 @@ namespace MetaQuery.Domain.Commands.CriarMetadado
                     id, metadado.Tabela);
 
                 return id;
-            }
-            catch (ArgumentException ex)
-            {
-                // Rollback em caso de erro de validação
-                _unitOfWork.Rollback();
-
-                // Exceções de validação do domínio viram notificações
-                _notificationContext.AddNotification("Validacao", ex.Message);
-                _logger.LogWarning(ex, "Erro de validação ao criar metadado para tabela: {Tabela}", request.Tabela);
-                return 0;
             }
             catch (Exception ex)
             {

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 using MetaQuery.Domain.Entities;
@@ -12,6 +13,7 @@ namespace MetaQuery.Infra.Data.Repositories
 {
     /// <summary>
     /// Repositório de metadados usando Dapper
+    /// Constitution 2.6: Todos os métodos async recebem e propagam CancellationToken via CommandDefinition
     /// </summary>
     public class MetadadosRepository : IMetadadosRepository
     {
@@ -32,7 +34,7 @@ namespace MetaQuery.Infra.Data.Repositories
             _connection = connection ?? throw new ArgumentNullException(nameof(connection));
         }
 
-        public async Task<TabelaDinamica?> ObterPorIdAsync(int id)
+        public async Task<TabelaDinamica?> ObterPorIdAsync(int id, CancellationToken cancellationToken = default)
         {
             const string sql = @"
                 SELECT
@@ -50,11 +52,12 @@ namespace MetaQuery.Infra.Data.Repositories
                 FROM TABELA_DINAMICA
                 WHERE ID = :Id";
 
-            var dto = await _connection.QueryFirstOrDefaultAsync<MetadadoDto>(sql, new { Id = id });
+            var command = new CommandDefinition(sql, new { Id = id }, cancellationToken: cancellationToken);
+            var dto = await _connection.QueryFirstOrDefaultAsync<MetadadoDto>(command);
             return dto != null ? MapToEntity(dto) : null;
         }
 
-        public async Task<TabelaDinamica?> ObterPorNomeTabelaAsync(string nomeTabela)
+        public async Task<TabelaDinamica?> ObterPorNomeTabelaAsync(string nomeTabela, CancellationToken cancellationToken = default)
         {
             const string sql = @"
                 SELECT
@@ -72,11 +75,12 @@ namespace MetaQuery.Infra.Data.Repositories
                 FROM TABELA_DINAMICA
                 WHERE UPPER(TABELA) = UPPER(:NomeTabela)";
 
-            var dto = await _connection.QueryFirstOrDefaultAsync<MetadadoDto>(sql, new { NomeTabela = nomeTabela });
+            var command = new CommandDefinition(sql, new { NomeTabela = nomeTabela }, cancellationToken: cancellationToken);
+            var dto = await _connection.QueryFirstOrDefaultAsync<MetadadoDto>(command);
             return dto != null ? MapToEntity(dto) : null;
         }
 
-        public async Task<IEnumerable<TabelaDinamica>> ObterTodosAsync(bool apenasAtivos = true)
+        public async Task<IEnumerable<TabelaDinamica>> ObterTodosAsync(bool apenasAtivos = true, CancellationToken cancellationToken = default)
         {
             var sql = @"
                 SELECT
@@ -98,11 +102,12 @@ namespace MetaQuery.Infra.Data.Repositories
 
             sql += " ORDER BY TABELA";
 
-            var dtos = await _connection.QueryAsync<MetadadoDto>(sql);
+            var command = new CommandDefinition(sql, cancellationToken: cancellationToken);
+            var dtos = await _connection.QueryAsync<MetadadoDto>(command);
             return dtos.Select(MapToEntity);
         }
 
-        public async Task<IEnumerable<TabelaDinamica>> ObterVisiveisParaIAAsync()
+        public async Task<IEnumerable<TabelaDinamica>> ObterVisiveisParaIAAsync(CancellationToken cancellationToken = default)
         {
             const string sql = @"
                 SELECT
@@ -121,11 +126,12 @@ namespace MetaQuery.Infra.Data.Repositories
                 WHERE VISIVEL_PARA_IA = 1 AND ATIVO = 1
                 ORDER BY TABELA";
 
-            var dtos = await _connection.QueryAsync<MetadadoDto>(sql);
+            var command = new CommandDefinition(sql, cancellationToken: cancellationToken);
+            var dtos = await _connection.QueryAsync<MetadadoDto>(command);
             return dtos.Select(MapToEntity);
         }
 
-        public async Task<int> CriarAsync(TabelaDinamica tabela)
+        public async Task<int> CriarAsync(TabelaDinamica tabela, CancellationToken cancellationToken = default)
         {
             const string sql = @"
                 INSERT INTO TABELA_DINAMICA (
@@ -153,11 +159,12 @@ namespace MetaQuery.Infra.Data.Repositories
             parameters.Add("Ativo", tabela.Ativo ? 1 : 0);
             parameters.Add("Id", dbType: DbType.Int32, direction: ParameterDirection.Output);
 
-            await _connection.ExecuteAsync(sql, parameters);
+            var command = new CommandDefinition(sql, parameters, cancellationToken: cancellationToken);
+            await _connection.ExecuteAsync(command);
             return parameters.Get<int>("Id");
         }
 
-        public async Task AtualizarAsync(TabelaDinamica tabela)
+        public async Task AtualizarAsync(TabelaDinamica tabela, CancellationToken cancellationToken = default)
         {
             const string sql = @"
                 UPDATE TABELA_DINAMICA SET
@@ -171,7 +178,7 @@ namespace MetaQuery.Infra.Data.Repositories
                     ATIVO = :Ativo
                 WHERE ID = :Id";
 
-            await _connection.ExecuteAsync(sql, new
+            var parameters = new
             {
                 Id = tabela.Id,
                 CamposDisponiveis = tabela.CamposDisponiveis,
@@ -182,23 +189,28 @@ namespace MetaQuery.Infra.Data.Repositories
                 VisivelParaIA = tabela.VisivelParaIA ? 1 : 0,
                 DataAtualizacao = DateTime.Now,
                 Ativo = tabela.Ativo ? 1 : 0
-            });
+            };
+
+            var command = new CommandDefinition(sql, parameters, cancellationToken: cancellationToken);
+            await _connection.ExecuteAsync(command);
         }
 
-        public async Task DeletarAsync(int id)
+        public async Task DeletarAsync(int id, CancellationToken cancellationToken = default)
         {
             const string sql = "DELETE FROM TABELA_DINAMICA WHERE ID = :Id";
-            await _connection.ExecuteAsync(sql, new { Id = id });
+            var command = new CommandDefinition(sql, new { Id = id }, cancellationToken: cancellationToken);
+            await _connection.ExecuteAsync(command);
         }
 
-        public async Task<bool> ExisteAsync(string nomeTabela)
+        public async Task<bool> ExisteAsync(string nomeTabela, CancellationToken cancellationToken = default)
         {
             const string sql = "SELECT COUNT(*) FROM TABELA_DINAMICA WHERE UPPER(TABELA) = UPPER(:NomeTabela)";
-            var count = await _connection.ExecuteScalarAsync<int>(sql, new { NomeTabela = nomeTabela });
+            var command = new CommandDefinition(sql, new { NomeTabela = nomeTabela }, cancellationToken: cancellationToken);
+            var count = await _connection.ExecuteScalarAsync<int>(command);
             return count > 0;
         }
 
-        public async Task<IEnumerable<TabelaDinamica>> ObterPorVinculoAsync(string nomeTabela)
+        public async Task<IEnumerable<TabelaDinamica>> ObterPorVinculoAsync(string nomeTabela, CancellationToken cancellationToken = default)
         {
             const string sql = @"
                 SELECT
@@ -216,7 +228,8 @@ namespace MetaQuery.Infra.Data.Repositories
                 FROM TABELA_DINAMICA
                 WHERE VINCULO_ENTRE_TABELA LIKE :Pattern AND ATIVO = 1";
 
-            var dtos = await _connection.QueryAsync<MetadadoDto>(sql, new { Pattern = $"%{nomeTabela}.%" });
+            var command = new CommandDefinition(sql, new { Pattern = $"%{nomeTabela}.%" }, cancellationToken: cancellationToken);
+            var dtos = await _connection.QueryAsync<MetadadoDto>(command);
             return dtos.Select(MapToEntity);
         }
 

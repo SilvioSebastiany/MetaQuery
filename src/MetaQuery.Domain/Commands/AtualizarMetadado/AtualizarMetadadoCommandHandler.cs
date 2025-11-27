@@ -33,7 +33,7 @@ namespace MetaQuery.Domain.Commands.AtualizarMetadado
             _logger.LogInformation("Atualizando metadado ID: {Id}", request.Id);
 
             // Buscar metadado existente
-            var metadado = await _repository.ObterPorIdAsync(request.Id);
+            var metadado = await _repository.ObterPorIdAsync(request.Id, cancellationToken);
             if (metadado == null)
             {
                 _notificationContext.AddNotification(
@@ -44,28 +44,35 @@ namespace MetaQuery.Domain.Commands.AtualizarMetadado
                 return false;
             }
 
+            // Atualizar entidade de domínio usando métodos de comportamento com NotificationContext
+            metadado.AtualizarCampos(request.CamposDisponiveis, _notificationContext);
+
+            if (!string.IsNullOrWhiteSpace(request.VinculoEntreTabela))
+            {
+                metadado.AtualizarVinculo(request.VinculoEntreTabela);
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.DescricaoTabela) || !string.IsNullOrWhiteSpace(request.DescricaoCampos))
+            {
+                metadado.AtualizarDescricao(request.DescricaoTabela, request.DescricaoCampos);
+            }
+
+            metadado.AlterarVisibilidadeIA(request.VisivelParaIA);
+
+            // Verificar se entidade é válida antes de persistir (Constitution 2.4)
+            if (!metadado.IsValid || _notificationContext.HasNotifications)
+            {
+                _logger.LogWarning("Erro de validação ao atualizar metadado ID: {Id}", request.Id);
+                return false;
+            }
+
             try
             {
                 // Iniciar transação
                 _unitOfWork.BeginTransaction();
 
-                // Atualizar entidade de domínio usando métodos de comportamento
-                metadado.AtualizarCampos(request.CamposDisponiveis);
-
-                if (!string.IsNullOrWhiteSpace(request.VinculoEntreTabela))
-                {
-                    metadado.AtualizarVinculo(request.VinculoEntreTabela);
-                }
-
-                if (!string.IsNullOrWhiteSpace(request.DescricaoTabela) || !string.IsNullOrWhiteSpace(request.DescricaoCampos))
-                {
-                    metadado.AtualizarDescricao(request.DescricaoTabela, request.DescricaoCampos);
-                }
-
-                metadado.AlterarVisibilidadeIA(request.VisivelParaIA);
-
                 // Persistir no banco
-                await _repository.AtualizarAsync(metadado);
+                await _repository.AtualizarAsync(metadado, cancellationToken);
 
                 // Commit da transação
                 _unitOfWork.Commit();
@@ -75,16 +82,6 @@ namespace MetaQuery.Domain.Commands.AtualizarMetadado
                     metadado.Id, metadado.Tabela);
 
                 return true;
-            }
-            catch (ArgumentException ex)
-            {
-                // Rollback em caso de erro de validação
-                _unitOfWork.Rollback();
-
-                // Exceções de validação do domínio viram notificações
-                _notificationContext.AddNotification("Validacao", ex.Message);
-                _logger.LogWarning(ex, "Erro de validação ao atualizar metadado ID: {Id}", request.Id);
-                return false;
             }
             catch (Exception ex)
             {

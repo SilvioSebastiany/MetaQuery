@@ -45,9 +45,9 @@ namespace MetaQuery.Tests.Commands.Handlers
                 VisivelParaIA = true
             };
 
-            _repositoryMock.Setup(x => x.ExisteAsync(It.IsAny<string>()))
+            _repositoryMock.Setup(x => x.ExisteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(false);
-            _repositoryMock.Setup(x => x.CriarAsync(It.IsAny<TabelaDinamica>()))
+            _repositoryMock.Setup(x => x.CriarAsync(It.IsAny<TabelaDinamica>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(1);
 
             // Act
@@ -69,9 +69,9 @@ namespace MetaQuery.Tests.Commands.Handlers
                 VisivelParaIA = true
             };
 
-            _repositoryMock.Setup(x => x.ExisteAsync(It.IsAny<string>()))
+            _repositoryMock.Setup(x => x.ExisteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(false);
-            _repositoryMock.Setup(x => x.CriarAsync(It.IsAny<TabelaDinamica>()))
+            _repositoryMock.Setup(x => x.CriarAsync(It.IsAny<TabelaDinamica>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(1);
 
             // Act
@@ -93,9 +93,9 @@ namespace MetaQuery.Tests.Commands.Handlers
                 VisivelParaIA = true
             };
 
-            _repositoryMock.Setup(x => x.ExisteAsync(It.IsAny<string>()))
+            _repositoryMock.Setup(x => x.ExisteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(false);
-            _repositoryMock.Setup(x => x.CriarAsync(It.IsAny<TabelaDinamica>()))
+            _repositoryMock.Setup(x => x.CriarAsync(It.IsAny<TabelaDinamica>(), It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new Exception("Erro ao criar"));
 
             // Act
@@ -117,9 +117,9 @@ namespace MetaQuery.Tests.Commands.Handlers
                 VisivelParaIA = true
             };
 
-            _repositoryMock.Setup(x => x.ExisteAsync(It.IsAny<string>()))
+            _repositoryMock.Setup(x => x.ExisteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(false);
-            _repositoryMock.Setup(x => x.CriarAsync(It.IsAny<TabelaDinamica>()))
+            _repositoryMock.Setup(x => x.CriarAsync(It.IsAny<TabelaDinamica>(), It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new Exception("Erro ao criar"));
 
             // Act
@@ -141,9 +141,9 @@ namespace MetaQuery.Tests.Commands.Handlers
                 VisivelParaIA = true
             };
 
-            _repositoryMock.Setup(x => x.ExisteAsync(It.IsAny<string>()))
+            _repositoryMock.Setup(x => x.ExisteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(false);
-            _repositoryMock.Setup(x => x.CriarAsync(It.IsAny<TabelaDinamica>()))
+            _repositoryMock.Setup(x => x.CriarAsync(It.IsAny<TabelaDinamica>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(61);
 
             // Act
@@ -165,7 +165,7 @@ namespace MetaQuery.Tests.Commands.Handlers
                 VisivelParaIA = true
             };
 
-            _repositoryMock.Setup(x => x.ExisteAsync("CLIENTES"))
+            _repositoryMock.Setup(x => x.ExisteAsync("CLIENTES", It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
             // Act
@@ -193,7 +193,7 @@ namespace MetaQuery.Tests.Commands.Handlers
                 VisivelParaIA = true
             };
 
-            _repositoryMock.Setup(x => x.ExisteAsync("CLIENTES"))
+            _repositoryMock.Setup(x => x.ExisteAsync("CLIENTES", It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
             // Act

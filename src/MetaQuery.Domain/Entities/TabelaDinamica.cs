@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MetaQuery.Domain.Notifications;
 
 namespace MetaQuery.Domain.Entities
 {
     /// <summary>
     /// Entity que representa os metadados de uma tabela no sistema
     /// Contém validações de domínio seguindo DDD
+    /// Usa NotificationContext ao invés de exceptions para validações de negócio (Constitution 2.4)
     /// </summary>
     public class TabelaDinamica
     {
@@ -22,10 +24,34 @@ namespace MetaQuery.Domain.Entities
         public DateTime? DataAtualizacao { get; private set; }
         public bool Ativo { get; private set; }
 
+        // Notification Pattern: lista interna de notificações de validação
+        private readonly List<Notification> _notifications = new();
+
+        /// <summary>
+        /// Indica se a entidade está válida (sem notificações de erro)
+        /// </summary>
+        public bool IsValid => !_notifications.Any();
+
+        /// <summary>
+        /// Notificações de validação da entidade
+        /// </summary>
+        public IReadOnlyCollection<Notification> Notifications => _notifications.AsReadOnly();
+
         // Construtor privado para EF/Dapper
         private TabelaDinamica() { }
 
-        // Factory method para criar nova tabela
+        /// <summary>
+        /// Factory method para criar nova tabela
+        /// </summary>
+        /// <param name="tabela">Nome da tabela</param>
+        /// <param name="camposDisponiveis">Lista de campos separados por vírgula</param>
+        /// <param name="chavePk">Nome da coluna chave primária</param>
+        /// <param name="vinculoEntreTabela">Vínculos com outras tabelas</param>
+        /// <param name="descricaoTabela">Descrição da tabela</param>
+        /// <param name="descricaoCampos">JSON com descrições dos campos</param>
+        /// <param name="visivelParaIA">Se a tabela é visível para IA</param>
+        /// <param name="notificationContext">Contexto de notificações para propagar erros de validação</param>
+        /// <returns>Instância de TabelaDinamica (verificar IsValid antes de persistir)</returns>
         public static TabelaDinamica Criar(
             string tabela,
             string camposDisponiveis,
@@ -33,7 +59,8 @@ namespace MetaQuery.Domain.Entities
             string? vinculoEntreTabela = null,
             string? descricaoTabela = null,
             string? descricaoCampos = null,
-            bool visivelParaIA = true)
+            bool visivelParaIA = true,
+            INotificationContext? notificationContext = null)
         {
             var entity = new TabelaDinamica
             {
@@ -49,14 +76,26 @@ namespace MetaQuery.Domain.Entities
             };
 
             entity.Validar();
+
+            // Propagar notificações para o contexto, se fornecido
+            if (notificationContext != null && entity._notifications.Any())
+            {
+                notificationContext.AddNotifications(entity._notifications);
+            }
+
             return entity;
         }
 
         // Métodos de atualização
-        public void AtualizarCampos(string camposDisponiveis)
+        public void AtualizarCampos(string camposDisponiveis, INotificationContext? notificationContext = null)
         {
             if (string.IsNullOrWhiteSpace(camposDisponiveis))
-                throw new ArgumentException("Campos disponíveis não pode ser vazio", nameof(camposDisponiveis));
+            {
+                var notification = new Notification("CamposDisponiveis", "Campos disponíveis não pode ser vazio");
+                _notifications.Add(notification);
+                notificationContext?.AddNotification(notification.Key, notification.Message);
+                return;
+            }
 
             CamposDisponiveis = camposDisponiveis;
             DataAtualizacao = DateTime.Now;
@@ -94,27 +133,22 @@ namespace MetaQuery.Domain.Entities
             DataAtualizacao = DateTime.Now;
         }
 
-        // Validações de domínio
+        // Validações de domínio usando Notification Pattern
         private void Validar()
         {
-            var erros = new List<string>();
-
             if (string.IsNullOrWhiteSpace(Tabela))
-                erros.Add("Nome da tabela é obrigatório");
+                _notifications.Add(new Notification("Tabela", "Nome da tabela é obrigatório"));
             else if (Tabela.Length > 100)
-                erros.Add("Nome da tabela não pode ter mais de 100 caracteres");
+                _notifications.Add(new Notification("Tabela", "Nome da tabela não pode ter mais de 100 caracteres"));
 
             if (string.IsNullOrWhiteSpace(CamposDisponiveis))
-                erros.Add("Campos disponíveis é obrigatório");
+                _notifications.Add(new Notification("CamposDisponiveis", "Campos disponíveis é obrigatório"));
 
             if (string.IsNullOrWhiteSpace(ChavePk))
-                erros.Add("Chave primária é obrigatória");
+                _notifications.Add(new Notification("ChavePk", "Chave primária é obrigatória"));
 
             if (VinculoEntreTabela != null && VinculoEntreTabela.Length > 500)
-                erros.Add("Vínculo entre tabelas não pode ter mais de 500 caracteres");
-
-            if (erros.Any())
-                throw new ArgumentException($"Erros de validação: {string.Join(", ", erros)}");
+                _notifications.Add(new Notification("VinculoEntreTabela", "Vínculo entre tabelas não pode ter mais de 500 caracteres"));
         }
 
         // Métodos auxiliares

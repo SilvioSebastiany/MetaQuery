@@ -5,7 +5,7 @@
 ### ===========================================
 
 ### 1. Listar tabelas disponíveis
-GET {{baseUrl}}/api/QueryBuilderTest/tabelas-disponiveis
+GET {{baseUrl}}/api/query-builder-test/tabelas-disponiveis
 Content-Type: application/json
 
 ### ===========================================
@@ -13,19 +13,19 @@ Content-Type: application/json
 ### ===========================================
 
 ### 2.1. Query simples - CLIENTES
-GET {{baseUrl}}/api/QueryBuilderTest/simples/CLIENTES
+GET {{baseUrl}}/api/query-builder-test/simples/CLIENTES
 Content-Type: application/json
 
 ### 2.2. Query simples - PRODUTOS
-GET {{baseUrl}}/api/QueryBuilderTest/simples/PRODUTOS
+GET {{baseUrl}}/api/query-builder-test/simples/PRODUTOS
 Content-Type: application/json
 
 ### 2.3. Query simples - PEDIDOS
-GET {{baseUrl}}/api/QueryBuilderTest/simples/PEDIDOS
+GET {{baseUrl}}/api/query-builder-test/simples/PEDIDOS
 Content-Type: application/json
 
 ### 2.4. Query simples - CATEGORIAS
-GET {{baseUrl}}/api/QueryBuilderTest/simples/CATEGORIAS
+GET {{baseUrl}}/api/query-builder-test/simples/CATEGORIAS
 Content-Type: application/json
 
 ### ===========================================
@@ -33,15 +33,15 @@ Content-Type: application/json
 ### ===========================================
 
 ### 3.1. CLIENTES com JOINs (deve incluir PEDIDOS e ENDERECOS)
-GET {{baseUrl}}/api/QueryBuilderTest/com-joins/CLIENTES?profundidade=1
+GET {{baseUrl}}/api/query-builder-test/com-joins/CLIENTES?profundidade=1
 Content-Type: application/json
 
 ### 3.2. PEDIDOS com JOINs (deve incluir CLIENTES e ITENS_PEDIDO)
-GET {{baseUrl}}/api/QueryBuilderTest/com-joins/PEDIDOS?profundidade=1
+GET {{baseUrl}}/api/query-builder-test/com-joins/PEDIDOS?profundidade=1
 Content-Type: application/json
 
 ### 3.3. PRODUTOS com JOINs (deve incluir CATEGORIAS e ITENS_PEDIDO)
-GET {{baseUrl}}/api/QueryBuilderTest/com-joins/PRODUTOS?profundidade=1
+GET {{baseUrl}}/api/query-builder-test/com-joins/PRODUTOS?profundidade=1
 Content-Type: application/json
 
 ### ===========================================
@@ -51,13 +51,13 @@ Content-Type: application/json
 ### 4.1. CLIENTES com JOINs profundidade 2
 # Deve incluir: CLIENTES → PEDIDOS → ITENS_PEDIDO
 #               CLIENTES → ENDERECOS
-GET {{baseUrl}}/api/QueryBuilderTest/com-joins/CLIENTES?profundidade=2
+GET {{baseUrl}}/api/query-builder-test/com-joins/CLIENTES?profundidade=2
 Content-Type: application/json
 
 ### 4.2. PEDIDOS com JOINs profundidade 2
 # Deve incluir: PEDIDOS → CLIENTES → ENDERECOS
 #               PEDIDOS → ITENS_PEDIDO → PRODUTOS
-GET {{baseUrl}}/api/QueryBuilderTest/com-joins/PEDIDOS?profundidade=2
+GET {{baseUrl}}/api/query-builder-test/com-joins/PEDIDOS?profundidade=2
 Content-Type: application/json
 
 ### ===========================================
@@ -65,7 +65,7 @@ Content-Type: application/json
 ### ===========================================
 
 ### 5.1. CLIENTES com JOINs profundidade 3
-GET {{baseUrl}}/api/QueryBuilderTest/com-joins/CLIENTES?profundidade=3
+GET {{baseUrl}}/api/query-builder-test/com-joins/CLIENTES?profundidade=3
 Content-Type: application/json
 
 ### ===========================================
@@ -73,7 +73,7 @@ Content-Type: application/json
 ### ===========================================
 
 ### 6.1. Filtrar clientes por nome
-POST {{baseUrl}}/api/QueryBuilderTest/com-filtros/CLIENTES
+POST {{baseUrl}}/api/query-builder-test/com-filtros/CLIENTES
 Content-Type: application/json
 
 {
@@ -81,7 +81,7 @@ Content-Type: application/json
 }
 
 ### 6.2. Filtrar clientes por email
-POST {{baseUrl}}/api/QueryBuilderTest/com-filtros/CLIENTES
+POST {{baseUrl}}/api/query-builder-test/com-filtros/CLIENTES
 Content-Type: application/json
 
 {
@@ -89,7 +89,7 @@ Content-Type: application/json
 }
 
 ### 6.3. Filtrar produtos por categoria
-POST {{baseUrl}}/api/QueryBuilderTest/com-filtros/PRODUTOS
+POST {{baseUrl}}/api/query-builder-test/com-filtros/PRODUTOS
 Content-Type: application/json
 
 {
@@ -97,7 +97,7 @@ Content-Type: application/json
 }
 
 ### 6.4. Filtrar pedidos por status
-POST {{baseUrl}}/api/QueryBuilderTest/com-filtros/PEDIDOS
+POST {{baseUrl}}/api/query-builder-test/com-filtros/PEDIDOS
 Content-Type: application/json
 
 {
@@ -105,7 +105,7 @@ Content-Type: application/json
 }
 
 ### 6.5. Múltiplos filtros - Produtos ativos da categoria 1
-POST {{baseUrl}}/api/QueryBuilderTest/com-filtros/PRODUTOS
+POST {{baseUrl}}/api/query-builder-test/com-filtros/PRODUTOS
 Content-Type: application/json
 
 {
@@ -118,11 +118,11 @@ Content-Type: application/json
 ### ===========================================
 
 ### 7.1. Tabela inexistente
-GET {{baseUrl}}/api/QueryBuilderTest/simples/TABELA_INEXISTENTE
+GET {{baseUrl}}/api/query-builder-test/simples/TABELA_INEXISTENTE
 Content-Type: application/json
 
 ### 7.2. Filtro com campo inválido (deve ignorar)
-POST {{baseUrl}}/api/QueryBuilderTest/com-filtros/CLIENTES
+POST {{baseUrl}}/api/query-builder-test/com-filtros/CLIENTES
 Content-Type: application/json
 
 {
@@ -136,10 +136,10 @@ Content-Type: application/json
 
 ### 8.1. Analisar SQL de CLIENTES com JOINs completos
 # Copie o SQL retornado e teste no SQL Developer
-GET {{baseUrl}}/api/QueryBuilderTest/com-joins/CLIENTES?profundidade=2
+GET {{baseUrl}}/api/query-builder-test/com-joins/CLIENTES?profundidade=2
 Content-Type: application/json
 
 ### 8.2. Analisar SQL de PEDIDOS com JOINs completos
 # Copie o SQL retornado e teste no SQL Developer
-GET {{baseUrl}}/api/QueryBuilderTest/com-joins/PEDIDOS?profundidade=2
+GET {{baseUrl}}/api/query-builder-test/com-joins/PEDIDOS?profundidade=2
 Content-Type: application/json

@@ -33,7 +33,7 @@ namespace MetaQuery.Domain.Commands.DesativarMetadado
             _logger.LogInformation("Desativando metadado ID: {Id}", request.Id);
 
             // Buscar metadado existente
-            var metadado = await _repository.ObterPorIdAsync(request.Id);
+            var metadado = await _repository.ObterPorIdAsync(request.Id, cancellationToken);
             if (metadado == null)
             {
                 _notificationContext.AddNotification(
@@ -64,7 +64,7 @@ namespace MetaQuery.Domain.Commands.DesativarMetadado
                 metadado.Desativar();
 
                 // Persistir no banco
-                await _repository.AtualizarAsync(metadado);
+                await _repository.AtualizarAsync(metadado, cancellationToken);
 
                 // Commit da transação
                 _unitOfWork.Commit();

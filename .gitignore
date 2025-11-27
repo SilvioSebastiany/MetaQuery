@@ -2,6 +2,8 @@
 *.md
 !README.md
 !docs/**/*.md
+!specs/**/*.md
+!pasta/**/*.md
 
 # Build artifacts
 **/bin/

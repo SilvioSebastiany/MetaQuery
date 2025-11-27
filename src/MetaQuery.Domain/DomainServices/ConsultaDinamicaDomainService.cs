@@ -7,6 +7,7 @@ namespace MetaQuery.Domain.DomainServices;
 
 /// <summary>
 /// Domain Service responsável pela lógica de negócio de consultas dinâmicas
+/// Constitution 2.6: Todos os métodos async recebem e propagam CancellationToken
 /// </summary>
 public class ConsultaDinamicaDomainService
 {
@@ -34,7 +35,8 @@ public class ConsultaDinamicaDomainService
         string tabela,
         bool incluirJoins,
         int profundidade,
-        bool formatoHierarquico = false)
+        bool formatoHierarquico = false,
+        CancellationToken cancellationToken = default)
     {
         _logger.LogInformation(
             "Consultando tabela {Tabela} com joins={IncluirJoins}, profundidade={Profundidade}, hierarquico={Hierarquico}",
@@ -45,7 +47,7 @@ public class ConsultaDinamicaDomainService
         var compiledQuery = _queryBuilderService.CompilarQuery(sqlQuery);
         _logger.LogDebug("SQL gerado: {Sql}", compiledQuery.Sql);
 
-        var dados = await _consultaDinamicaRepository.ExecutarQueryAsync(sqlQuery);
+        var dados = await _consultaDinamicaRepository.ExecutarQueryAsync(sqlQuery, cancellationToken);
 
         // Agrupar hierarquicamente se solicitado
         if (formatoHierarquico && incluirJoins && dados.Any())

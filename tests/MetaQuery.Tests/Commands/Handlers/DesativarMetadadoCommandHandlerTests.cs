@@ -40,7 +40,7 @@ namespace MetaQuery.Tests.Commands.Handlers
             var metadado = TabelaDinamica.Criar("CLIENTES", "ID,NOME", "ID", visivelParaIA: true);
             var command = new DesativarMetadadoCommand(1);
 
-            _repositoryMock.Setup(x => x.ObterPorIdAsync(1))
+            _repositoryMock.Setup(x => x.ObterPorIdAsync(1, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(metadado);
 
             // Act
@@ -57,7 +57,7 @@ namespace MetaQuery.Tests.Commands.Handlers
             var metadado = TabelaDinamica.Criar("CLIENTES", "ID,NOME", "ID", visivelParaIA: true);
             var command = new DesativarMetadadoCommand(1);
 
-            _repositoryMock.Setup(x => x.ObterPorIdAsync(1))
+            _repositoryMock.Setup(x => x.ObterPorIdAsync(1, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(metadado);
 
             // Act
@@ -74,9 +74,9 @@ namespace MetaQuery.Tests.Commands.Handlers
             var metadado = TabelaDinamica.Criar("CLIENTES", "ID,NOME", "ID", visivelParaIA: true);
             var command = new DesativarMetadadoCommand(1);
 
-            _repositoryMock.Setup(x => x.ObterPorIdAsync(1))
+            _repositoryMock.Setup(x => x.ObterPorIdAsync(1, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(metadado);
-            _repositoryMock.Setup(x => x.AtualizarAsync(It.IsAny<TabelaDinamica>()))
+            _repositoryMock.Setup(x => x.AtualizarAsync(It.IsAny<TabelaDinamica>(), It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new Exception("Erro ao desativar"));
 
             // Act
@@ -92,7 +92,7 @@ namespace MetaQuery.Tests.Commands.Handlers
             // Arrange
             var command = new DesativarMetadadoCommand(999);
 
-            _repositoryMock.Setup(x => x.ObterPorIdAsync(999))
+            _repositoryMock.Setup(x => x.ObterPorIdAsync(999, It.IsAny<CancellationToken>()))
                 .ReturnsAsync((TabelaDinamica?)null);
 
             // Act
@@ -108,7 +108,7 @@ namespace MetaQuery.Tests.Commands.Handlers
             // Arrange
             var command = new DesativarMetadadoCommand(999);
 
-            _repositoryMock.Setup(x => x.ObterPorIdAsync(999))
+            _repositoryMock.Setup(x => x.ObterPorIdAsync(999, It.IsAny<CancellationToken>()))
                 .ReturnsAsync((TabelaDinamica?)null);
 
             // Act
@@ -133,7 +133,7 @@ namespace MetaQuery.Tests.Commands.Handlers
 
             var command = new DesativarMetadadoCommand(1);
 
-            _repositoryMock.Setup(x => x.ObterPorIdAsync(1))
+            _repositoryMock.Setup(x => x.ObterPorIdAsync(1, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(metadado);
 
             // Act
@@ -150,7 +150,7 @@ namespace MetaQuery.Tests.Commands.Handlers
             var metadado = TabelaDinamica.Criar("CLIENTES", "ID,NOME", "ID", visivelParaIA: true);
             var command = new DesativarMetadadoCommand(1);
 
-            _repositoryMock.Setup(x => x.ObterPorIdAsync(1))
+            _repositoryMock.Setup(x => x.ObterPorIdAsync(1, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(metadado);
 
             // Act

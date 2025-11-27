@@ -45,7 +45,7 @@ namespace MetaQuery.Tests.Commands.Handlers
                 VisivelParaIA = true
             };
 
-            _repositoryMock.Setup(x => x.ObterPorIdAsync(1))
+            _repositoryMock.Setup(x => x.ObterPorIdAsync(1, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(metadado);
 
             // Act
@@ -67,7 +67,7 @@ namespace MetaQuery.Tests.Commands.Handlers
                 VisivelParaIA = true
             };
 
-            _repositoryMock.Setup(x => x.ObterPorIdAsync(1))
+            _repositoryMock.Setup(x => x.ObterPorIdAsync(1, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(metadado);
 
             // Act
@@ -89,9 +89,9 @@ namespace MetaQuery.Tests.Commands.Handlers
                 VisivelParaIA = true
             };
 
-            _repositoryMock.Setup(x => x.ObterPorIdAsync(1))
+            _repositoryMock.Setup(x => x.ObterPorIdAsync(1, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(metadado);
-            _repositoryMock.Setup(x => x.AtualizarAsync(It.IsAny<TabelaDinamica>()))
+            _repositoryMock.Setup(x => x.AtualizarAsync(It.IsAny<TabelaDinamica>(), It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new Exception("Erro ao atualizar"));
 
             // Act
@@ -112,7 +112,7 @@ namespace MetaQuery.Tests.Commands.Handlers
                 VisivelParaIA = true
             };
 
-            _repositoryMock.Setup(x => x.ObterPorIdAsync(999))
+            _repositoryMock.Setup(x => x.ObterPorIdAsync(999, It.IsAny<CancellationToken>()))
                 .ReturnsAsync((TabelaDinamica?)null);
 
             // Act
@@ -133,7 +133,7 @@ namespace MetaQuery.Tests.Commands.Handlers
                 VisivelParaIA = true
             };
 
-            _repositoryMock.Setup(x => x.ObterPorIdAsync(999))
+            _repositoryMock.Setup(x => x.ObterPorIdAsync(999, It.IsAny<CancellationToken>()))
                 .ReturnsAsync((TabelaDinamica?)null);
 
             // Act
@@ -161,7 +161,7 @@ namespace MetaQuery.Tests.Commands.Handlers
                 VisivelParaIA = false
             };
 
-            _repositoryMock.Setup(x => x.ObterPorIdAsync(1))
+            _repositoryMock.Setup(x => x.ObterPorIdAsync(1, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(metadado);
 
             // Act
