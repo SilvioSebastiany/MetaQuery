@@ -25,6 +25,7 @@
 - Atualizado `CQRS_IMPLEMENTATION.md` com padrão Herval 100%
 - Criado `CHANGELOG.md` (este arquivo)
 - Criado `novas_funcionalidades.md` com documentação detalhada
+- Criado `ROADMAP_DREMIO.md` com plano de integração futura
 
 ### 🔧 Melhorias
 - Queries sem MediatR (repositório direto) para melhor performance
